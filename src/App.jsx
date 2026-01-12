@@ -601,9 +601,9 @@ const WordSwipeQuiz = () => {
                         </div>
                     </div>
                 ) : !isGameStarted && (
-                    <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-12 text-center">
                         <div className="text-6xl mb-6">📚</div>
-                        <h2 className="text-4xl font-bold text-gray-800 mb-4">영어 단어 퀴즈에 오신 것을 환영합니다!</h2>
+                        <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-4 leading-tight break-words">영어 단어 퀴즈에 오신 것을 환영합니다!</h2>
                         <p className="text-xl text-gray-600 mb-8">
                             재미있게 영어 단어를 배워보세요
                         </p>
