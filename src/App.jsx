@@ -85,15 +85,25 @@ const WordSwipeQuiz = () => {
             const response = await fetch(`/words/${level}.json`);
             if (response.ok) {
                 const data = await response.json();
-                setWords(data);
+                // 최대 20개의 단어를 랜덤으로 선택
+                const selectedWords = data
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 20);
+                setWords(selectedWords);
                 setDifficulty(level);
             } else {
                 console.log('파일을 찾을 수 없어 기본 단어를 사용합니다.');
-                setWords(defaultWords);
+                const selectedWords = defaultWords
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 20);
+                setWords(selectedWords);
             }
         } catch (error) {
             console.log('파일 로드 실패, 기본 단어를 사용합니다.');
-            setWords(defaultWords);
+            const selectedWords = defaultWords
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 20);
+            setWords(selectedWords);
         }
         setIsLoading(false);
     };
@@ -462,17 +472,25 @@ const WordSwipeQuiz = () => {
                             </div>
 
                             {timerMode && (
-                                <div className="flex items-center justify-center gap-4 mb-4">
-                                    <div className={`text-6xl font-bold ${getTimerColor()}`}>
-                                        {timeLeft}
+                                <div className="flex items-center justify-between gap-4 mb-4">
+                                    <div className="text-2xl font-bold text-green-600">
+                                        ○ {score}
                                     </div>
-                                    <button
-                                        onClick={togglePause}
-                                        className="p-3 bg-blue-100 rounded-full hover:bg-blue-200 transition"
-                                        title={isTimerPaused ? "계속" : "일시정지"}
-                                    >
-                                        {isTimerPaused ? <Play size={24} /> : <Pause size={24} />}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`text-6xl font-bold ${getTimerColor()}`}>
+                                            {timeLeft}
+                                        </div>
+                                        <button
+                                            onClick={togglePause}
+                                            className="p-3 bg-blue-100 rounded-full hover:bg-blue-200 transition"
+                                            title={isTimerPaused ? "계속" : "일시정지"}
+                                        >
+                                            {isTimerPaused ? <Play size={24} /> : <Pause size={24} />}
+                                        </button>
+                                    </div>
+                                    <div className="text-2xl font-bold text-red-600">
+                                        ✕ {total - score}
+                                    </div>
                                 </div>
                             )}
 
