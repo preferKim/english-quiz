@@ -372,11 +372,11 @@ const WordSwipeQuiz = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex items-center justify-center overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4 flex items-center justify-center overflow-x-hidden">
             <div className="max-w-2xl w-full">
                 {isGameStarted && (
-                    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div className="flex justify-between items-center mb-4">
+                    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
+                        <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
                             <button
                                 onClick={resetGame}
                                 className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition flex items-center gap-2"
@@ -387,7 +387,7 @@ const WordSwipeQuiz = () => {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => changeDifficulty('easy')}
-                                    className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition ${
                                         difficulty === 'easy'
                                             ? 'bg-green-500 text-white'
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -397,7 +397,7 @@ const WordSwipeQuiz = () => {
                                 </button>
                                 <button
                                     onClick={() => changeDifficulty('medium')}
-                                    className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition ${
                                         difficulty === 'medium'
                                             ? 'bg-yellow-500 text-white'
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -407,7 +407,7 @@ const WordSwipeQuiz = () => {
                                 </button>
                                 <button
                                     onClick={() => changeDifficulty('hard')}
-                                    className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition ${
                                         difficulty === 'hard'
                                             ? 'bg-red-500 text-white'
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -640,25 +640,25 @@ const WordSwipeQuiz = () => {
 
                         <div className="mb-6">
                             <p className="text-lg font-semibold text-gray-700 mb-4">난이도를 선택하세요</p>
-                            <div className="flex gap-4 justify-center">
+                            <div className="flex flex-wrap gap-4 justify-center">
                                 <button
                                     onClick={() => startGame('easy')}
                                     disabled={isLoading}
-                                    className="px-8 py-4 bg-green-500 text-white text-xl font-bold rounded-full hover:bg-green-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
+                                    className="px-6 py-3 sm:px-8 sm:py-4 bg-green-500 text-white text-lg sm:text-xl font-bold rounded-full hover:bg-green-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
                                 >
                                     쉬움 🌱
                                 </button>
                                 <button
                                     onClick={() => startGame('medium')}
                                     disabled={isLoading}
-                                    className="px-8 py-4 bg-yellow-500 text-white text-xl font-bold rounded-full hover:bg-yellow-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
+                                    className="px-6 py-3 sm:px-8 sm:py-4 bg-yellow-500 text-white text-lg sm:text-xl font-bold rounded-full hover:bg-yellow-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
                                 >
                                     보통 🔥
                                 </button>
                                 <button
                                     onClick={() => startGame('hard')}
                                     disabled={isLoading}
-                                    className="px-8 py-4 bg-red-500 text-white text-xl font-bold rounded-full hover:bg-red-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
+                                    className="px-6 py-3 sm:px-8 sm:py-4 bg-red-500 text-white text-lg sm:text-xl font-bold rounded-full hover:bg-red-600 transition shadow-lg transform hover:scale-105 disabled:opacity-50"
                                 >
                                     어려움 ⚡
                                 </button>
