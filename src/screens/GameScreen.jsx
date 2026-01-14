@@ -23,6 +23,7 @@ const GameScreen = ({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
+    gameMode,
 }) => {
     if (!words || words.length === 0 || !words[currentIndex]) {
         return (
@@ -47,16 +48,18 @@ const GameScreen = ({
                 >
                     <ArrowLeft size={24} />
                 </button>
-                <div className="text-sm font-bold text-indigo-500 mb-2 uppercase tracking-wider ">
-                    Level {stage} ({currentIndex + 1}/{words.length})
-                </div>
+                {gameMode === 'normal' && (
+                    <div className="text-sm font-bold text-indigo-500 mb-2 uppercase tracking-wider ">
+                        Level {stage} ({currentIndex + 1}/{words.length})
+                    </div>
+                )}
                 
                 <div className="flex items-center justify-center gap-3 mb-2">
                     <div className="text-5xl font-bold text-gray-800">
                         {words[currentIndex].english}
                     </div>
                     <button
-                        onClick={() => speakWord(words[currentIndex].english)}
+                        onClick={() => speakWord(words[currentIndex].english, 1)}
                         className="p-3 hover:bg-gray-100 rounded-full transition"
                         title="발음 듣기"
                     >

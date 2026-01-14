@@ -36,18 +36,24 @@ const WordSwipeQuiz = () => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [gameMode, setGameMode] = useState('normal');
+    const [speedRunTimeLeft, setSpeedRunTimeLeft] = useState(100);
+
     const cardRef = useRef(null);
     const timerRef = useRef(null);
     const quizRef = useRef(null);
 
+    // Auto-speak for normal mode
     useEffect(() => {
-        if (isGameStarted && words.length > 0) {
+        if (isGameStarted && words.length > 0 && gameMode === 'normal') {
             generateOptions();
             if (words[currentIndex]) {
                 speakWord(words[currentIndex].english);
             }
+        } else if (isGameStarted && words.length > 0 && gameMode === 'speed') {
+            generateOptions();
         }
-    }, [currentIndex, isGameStarted, words]);
+    }, [currentIndex, isGameStarted, words, gameMode]);
 
     useEffect(() => {
         const handleBackButton = (e) => {
@@ -67,55 +73,70 @@ const WordSwipeQuiz = () => {
         };
     }, [isGameStarted]);
 
+    // Timer for Normal Mode
     useEffect(() => {
-        if (timerMode && !isTimerPaused && timeLeft > 0 && !feedback && isGameStarted && !isSpeaking) {
-            // 3초 이하일 때 경고음 발생
+        if (gameMode === 'normal' && timerMode && !isTimerPaused && timeLeft > 0 && !feedback && isGameStarted && !isSpeaking) {
             if (timeLeft <= 3 && timeLeft > 0) {
                 playWarningSound();
             }
-            
             timerRef.current = setTimeout(() => {
                 setTimeLeft(timeLeft - 1);
             }, 1000);
-        } else if (timerMode && timeLeft === 0 && !feedback && isGameStarted) {
+        } else if (gameMode === 'normal' && timerMode && timeLeft === 0 && !feedback && isGameStarted) {
             handleTimeout();
         }
 
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
-    }, [timerMode, timeLeft, isTimerPaused, feedback, isGameStarted, isSpeaking]);
+    }, [gameMode, timerMode, timeLeft, isTimerPaused, feedback, isGameStarted, isSpeaking]);
 
-    const loadWords = async (level) => {
+    // Timer for Speed Mode
+    useEffect(() => {
+        if (gameMode === 'speed' && isGameStarted && !isTimerPaused && speedRunTimeLeft > 0) {
+            timerRef.current = setTimeout(() => {
+                setSpeedRunTimeLeft(prev => prev - 1);
+            }, 1000);
+        } else if (gameMode === 'speed' && isGameStarted && speedRunTimeLeft === 0) {
+            setIsGameStarted(false); // End game
+            setShowQuiz(false);
+        }
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [gameMode, isGameStarted, isTimerPaused, speedRunTimeLeft]);
+
+
+    const loadWords = async (level, mode) => {
         setIsLoading(true);
         try {
             const response = await fetch(`/words/${level}.json`);
-
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data) && data.length > 0 && data.some(item => 'level' in item)) {
+                if (mode === 'speed') {
                     setAllWords(data);
-                    setStage(1);
-                    const stageWords = data.filter(w => w.level === 1);
-                    setWords(stageWords.length > 0 ? stageWords.sort(() => Math.random() - 0.5).slice(0, 4) : []);
-                } else {
-                    setWords(data.sort(() => Math.random() - 0.5).slice(0, 20));
-                    setAllWords([]);
+                    setWords(data);
+                } else { // normal mode
+                    if (Array.isArray(data) && data.length > 0 && data.some(item => 'level' in item)) {
+                        setAllWords(data);
+                        setStage(1);
+                        const stageWords = data.filter(w => w.level === 1);
+                        setWords(stageWords.length > 0 ? stageWords.sort(() => Math.random() - 0.5).slice(0, 4) : []);
+                    } else {
+                        setWords(data.sort(() => Math.random() - 0.5).slice(0, 20));
+                        setAllWords([]);
+                    }
                 }
                 setDifficulty(level);
             } else {
                 console.log('파일을 찾을 수 없어 기본 단어를 사용합니다.');
-                const selectedWords = defaultWords
-                    .sort(() => Math.random() - 0.5)
-                    .slice(0, 20);
+                const selectedWords = defaultWords.sort(() => Math.random() - 0.5).slice(0, 20);
                 setWords(selectedWords);
                 setAllWords([]);
             }
         } catch (error) {
             console.log('파일 로드 실패, 기본 단어를 사용합니다.');
-            const selectedWords = defaultWords
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 20);
+            const selectedWords = defaultWords.sort(() => Math.random() - 0.5).slice(0, 20);
             setWords(selectedWords);
             setAllWords([]);
         }
@@ -124,6 +145,15 @@ const WordSwipeQuiz = () => {
 
     const handleNext = () => {
         setFeedback(null);
+
+        if (gameMode === 'speed') {
+             if (words.length > 0) {
+                setCurrentIndex(Math.floor(Math.random() * words.length));
+            }
+            return;
+        }
+
+        // Normal Mode
         setTimeLeft(5);
         if (currentIndex < words.length - 1) {
             setCurrentIndex(currentIndex + 1);
@@ -187,7 +217,6 @@ const WordSwipeQuiz = () => {
     };
 
     const playWarningSound = () => {
-        // Web Audio API를 사용하여 경고음 생성
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
@@ -195,7 +224,7 @@ const WordSwipeQuiz = () => {
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         
-        oscillator.frequency.value = 800; // 주파수 설정 (Hz)
+        oscillator.frequency.value = 800;
         oscillator.type = 'sine';
         
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -206,37 +235,31 @@ const WordSwipeQuiz = () => {
     };
 
     const playTimeoutBuzzer = () => {
-        // 부저음을 두 번 재생
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
         const playBeep = (delayTime) => {
             setTimeout(() => {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 600; // 부저음 주파수
+                oscillator.frequency.value = 600;
                 oscillator.type = 'sine';
-                
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.2);
             }, delayTime);
         };
-        
-        // 첫 번째 부저음
         playBeep(0);
-        // 두 번째 부저음 (300ms 후)
         playBeep(300);
     };
 
     const generateOptions = () => {
+        if (!words[currentIndex]) return;
         const current = words[currentIndex];
-        const wrongOptions = allWords
+        const sourceForOptions = allWords.length > 0 ? allWords : words;
+
+        const wrongOptions = sourceForOptions
             .filter(w => w.english !== current.english)
             .sort(() => Math.random() - 0.5)
             .slice(0, 3)
@@ -260,13 +283,10 @@ const WordSwipeQuiz = () => {
 
     const handleDragMove = (e) => {
         if (!isDragging || !dragStart) return;
-
         if (e.cancelable) e.preventDefault();
-
         const pos = e.type.includes('mouse')
             ? { x: e.clientX, y: e.clientY }
             : { x: e.touches[0].clientX, y: e.touches[0].clientY };
-
         setDragCurrent(pos);
     };
 
@@ -301,13 +321,7 @@ const WordSwipeQuiz = () => {
     };
 
     const checkAnswer = (direction) => {
-        const directionMap = {
-            up: 0,
-            down: 1,
-            left: 2,
-            right: 3
-        };
-
+        const directionMap = { up: 0, down: 1, left: 2, right: 3 };
         const selectedAnswer = options[directionMap[direction]];
         const correctAnswer = words[currentIndex].korean;
         const isCorrect = selectedAnswer === correctAnswer;
@@ -315,8 +329,11 @@ const WordSwipeQuiz = () => {
         setTotal(total + 1);
         if (isCorrect) {
             setScore(score + 1);
+            if (gameMode === 'speed') {
+                handleNext();
+                return;
+            }
             setFeedback('correct');
-            
             const currentWord = words[currentIndex];
             if (currentWord.example) {
                 speakWord(currentWord.example, 1, handleNext);
@@ -324,9 +341,12 @@ const WordSwipeQuiz = () => {
                 setTimeout(handleNext, 1000);
             }
         } else {
+             if (gameMode === 'speed') {
+                handleNext();
+                return;
+            }
             setFeedback('wrong');
             playTimeoutBuzzer();
-
             setTimeout(() => {
                 const currentWord = words[currentIndex];
                 speakWord(currentWord.english, 1, () => {
@@ -350,10 +370,13 @@ const WordSwipeQuiz = () => {
         setIsGameStarted(false);
         setShowQuiz(false);
         setIsSpeaking(false);
+        setGameMode('normal');
+        setSpeedRunTimeLeft(100);
     };
 
-    const startGame = async (level) => {
-        await loadWords(level);
+    const startGame = async (level, mode) => {
+        setGameMode(mode);
+        await loadWords(level, mode);
         setIsGameStarted(true);
         setCurrentIndex(0);
         setScore(0);
@@ -361,6 +384,7 @@ const WordSwipeQuiz = () => {
         setStage(1);
         setFeedback(null);
         setTimeLeft(5);
+        setSpeedRunTimeLeft(100);
         setIsTimerPaused(false);
 
         setTimeout(() => {
@@ -371,21 +395,6 @@ const WordSwipeQuiz = () => {
                 }
             }, 100);
         }, 300);
-    };
-
-    const changeDifficulty = async (level) => {
-        await loadWords(level);
-        setCurrentIndex(0);
-        setScore(0);
-        setTotal(0);
-        setFeedback(null);
-        setTimeLeft(5);
-    };
-
-    const toggleTimerMode = () => {
-        setTimerMode(!timerMode);
-        setTimeLeft(5);
-        setIsTimerPaused(false);
     };
 
     const togglePause = () => {
@@ -401,12 +410,16 @@ const WordSwipeQuiz = () => {
     };
 
     const getTimerColor = () => {
-        if (timeLeft > 3) return 'text-green-600';
-        if (timeLeft > 1) return 'text-yellow-600';
+        const time = gameMode === 'speed' ? speedRunTimeLeft : timeLeft;
+        if (gameMode === 'speed') {
+             if (time > 30) return 'text-green-600';
+             if (time > 10) return 'text-yellow-600';
+             return 'text-red-600';
+        }
+        if (time > 3) return 'text-green-600';
+        if (time > 1) return 'text-yellow-600';
         return 'text-red-600';
     };
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4 flex items-center justify-center overflow-x-hidden">
@@ -418,11 +431,11 @@ const WordSwipeQuiz = () => {
                         stage={stage}
                         score={score}
                         total={total}
-                        timeLeft={timeLeft}
+                        timeLeft={gameMode === 'speed' ? speedRunTimeLeft : timeLeft}
                         timerMode={timerMode}
                         isTimerPaused={isTimerPaused}
                         options={options}
-                        feedback={feedback}
+                        feedback={gameMode === 'speed' ? null : feedback}
                         isDragging={isDragging}
                         quizRef={quizRef}
                         cardRef={cardRef}
@@ -434,6 +447,7 @@ const WordSwipeQuiz = () => {
                         handleDragStart={handleDragStart}
                         handleDragMove={handleDragMove}
                         handleDragEnd={handleDragEnd}
+                        gameMode={gameMode}
                     />
                 ) : (
                     <HomeScreen onStartGame={startGame} isLoading={isLoading} />

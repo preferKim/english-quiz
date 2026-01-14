@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const HomeScreen = ({ onStartGame, isLoading }) => {
+    const [gameMode, setGameMode] = useState('normal');
+
     return (
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-12 text-center border-4 border-indigo-200">
             <h2 className="text-3xl sm:text-5xl font-extrabold text-indigo-600 mb-4 leading-tight break-words tracking-tight animate-bounce">
@@ -36,25 +38,51 @@ const HomeScreen = ({ onStartGame, isLoading }) => {
                 </div>
             </div>
 
+            <div className="mb-8">
+                <p className="text-xl font-bold text-indigo-800 mb-4">게임 모드를 선택하세요!</p>
+                <div className="flex justify-center gap-2">
+                    <button
+                        onClick={() => setGameMode('normal')}
+                        className={`px-6 py-3 rounded-xl font-bold transition ${
+                            gameMode === 'normal' 
+                                ? 'bg-indigo-600 text-white shadow-lg scale-105' 
+                                : 'bg-gray-200 text-gray-600'
+                        }`}
+                    >
+                        🎓 일반 모드
+                    </button>
+                    <button
+                        onClick={() => setGameMode('speed')}
+                        className={`px-6 py-3 rounded-xl font-bold transition ${
+                            gameMode === 'speed' 
+                                ? 'bg-amber-500 text-white shadow-lg scale-105' 
+                                : 'bg-gray-200 text-gray-600'
+                        }`}
+                    >
+                        ⚡️ 스피드 모드
+                    </button>
+                </div>
+            </div>
+
             <div className="mb-4">
                 <p className="text-xl font-bold text-indigo-800 mb-4">도전할 레벨을 골라보세요!</p>
                 <div className="grid grid-cols-3 gap-2">
                     <button
-                        onClick={() => onStartGame('easy')}
+                        onClick={() => onStartGame('easy', gameMode)}
                         disabled={isLoading}
                         className="px-2 py-4 bg-green-400 text-white text-sm font-bold rounded-2xl hover:bg-green-500 transition shadow-[0_4px_0_rgb(34,197,94)] active:shadow-none active:translate-y-[4px] disabled:opacity-50"
                     >
                         🐣<br/>병아리반
                     </button>
                     <button
-                        onClick={() => onStartGame('medium')}
+                        onClick={() => onStartGame('medium', gameMode)}
                         disabled={isLoading}
                         className="px-2 py-4 bg-yellow-400 text-white text-sm font-bold rounded-2xl hover:bg-yellow-500 transition shadow-[0_4px_0_rgb(234,179,8)] active:shadow-none active:translate-y-[4px] disabled:opacity-50"
                     >
                         🐰<br/>토끼반
                     </button>
                     <button
-                        onClick={() => onStartGame('hard')}
+                        onClick={() => onStartGame('hard', gameMode)}
                         disabled={isLoading}
                         className="px-2 py-4 bg-red-400 text-white text-sm font-bold rounded-2xl hover:bg-red-500 transition shadow-[0_4px_0_rgb(239,68,68)] active:shadow-none active:translate-y-[4px] disabled:opacity-50"
                     >
@@ -70,3 +98,4 @@ const HomeScreen = ({ onStartGame, isLoading }) => {
 };
 
 export default HomeScreen;
+
