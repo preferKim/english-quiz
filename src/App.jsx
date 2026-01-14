@@ -175,6 +175,7 @@ const WordSwipeQuiz = () => {
                     setWords(nextStageWords.sort(() => Math.random() - 0.5).slice(0, 4));
                     setCurrentIndex(0);
                 } else {
+                    setShowRanking(true);
                     setIsGameStarted(false);
                     setShowQuiz(false);
                 }
@@ -443,7 +444,14 @@ const WordSwipeQuiz = () => {
 
     const renderContent = () => {
         if (showRanking) {
-            return <RankingScreen rankings={speedRankings} onRestart={handleRestart} />;
+            return <RankingScreen 
+                rankings={speedRankings} 
+                onRestart={handleRestart} 
+                gameMode={gameMode}
+                score={score}
+                wrongAnswers={wrongAnswers}
+                total={total}
+            />;
         }
         if (isGameStarted && showQuiz) {
             return (
