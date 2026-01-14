@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import HomeScreen from './screens/HomeScreen';
 import GameScreen from './screens/GameScreen';
 import RankingScreen from './screens/RankingScreen';
+import ConnectingGameScreen from './screens/ConnectingGameScreen';
 
 
 const WordSwipeQuiz = () => {
@@ -42,11 +43,36 @@ const WordSwipeQuiz = () => {
     const [playerName, setPlayerName] = useState('');
     const [speedRankings, setSpeedRankings] = useState([]);
     const [showRanking, setShowRanking] = useState(false);
+    const [lives, setLives] = useState(3);
+    const [connectWords, setConnectWords] = useState([]);
+    const [matchedPairs, setMatchedPairs] = useState([]);
 
     const cardRef = useRef(null);
     const timerRef = useRef(null);
     const quizRef = useRef(null);
+    const dragPosRef = useRef({ x: 0, y: 0 });
 
+    const checkConnectAnswer = (word1, word2) => {
+        if (word1.english === word2.english) {
+            const newMatchedPairs = [...matchedPairs, word1.english];
+            setMatchedPairs(newMatchedPairs);
+            
+            if (newMatchedPairs.length === connectWords.length) {
+                // Game Won
+                setScore(lives * 10); // Example score calculation
+                setShowRanking(true);
+            }
+        } else {
+            const newLives = lives - 1;
+            setLives(newLives);
+            if (newLives <= 0) {
+                // Game Over
+                setScore(matchedPairs.length * 5); // Example score calculation
+                setShowRanking(true);
+            }
+        }
+    };
+    
     // Auto-speak for normal mode
     useEffect(() => {
         if (isGameStarted && words.length > 0 && gameMode === 'normal') {
@@ -98,7 +124,7 @@ const WordSwipeQuiz = () => {
     // Timer for Speed Mode
     useEffect(() => {
         if (gameMode === 'speed' && isGameStarted && !isTimerPaused && speedRunTimeLeft > 0) {
-            playWarningSound();
+            playTickSound();
             timerRef.current = setTimeout(() => {
                 setSpeedRunTimeLeft(prev => prev - 1);
             }, 1000);
@@ -124,6 +150,9 @@ const WordSwipeQuiz = () => {
                 if (mode === 'speed') {
                     setAllWords(data);
                     setWords(data);
+                } else if (mode === 'connect') {
+                    setConnectWords(data.sort(() => Math.random() - 0.5).slice(0, 10));
+                    setWords([]); // Clear other modes' words
                 } else { // normal mode
                     if (Array.isArray(data) && data.length > 0 && data.some(item => 'level' in item)) {
                         setAllWords(data);
@@ -139,13 +168,21 @@ const WordSwipeQuiz = () => {
             } else {
                 console.log('파일을 찾을 수 없어 기본 단어를 사용합니다.');
                 const selectedWords = defaultWords.sort(() => Math.random() - 0.5).slice(0, 20);
-                setWords(selectedWords);
+                if (mode === 'connect') {
+                    setConnectWords(selectedWords.slice(0, 10));
+                } else {
+                    setWords(selectedWords);
+                }
                 setAllWords([]);
             }
         } catch (error) {
             console.log('파일 로드 실패, 기본 단어를 사용합니다.');
             const selectedWords = defaultWords.sort(() => Math.random() - 0.5).slice(0, 20);
-            setWords(selectedWords);
+            if (mode === 'connect') {
+                setConnectWords(selectedWords.slice(0, 10));
+            } else {
+                setWords(selectedWords);
+            }
             setAllWords([]);
         }
         setIsLoading(false);
@@ -243,6 +280,27 @@ const WordSwipeQuiz = () => {
         oscillator.stop(audioContext.currentTime + 0.1);
     };
 
+    const playTickSound = () => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(3000, audioContext.currentTime);
+
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.05);
+    };
+
     const playTimeoutBuzzer = () => {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const playBeep = (delayTime) => {
@@ -279,8 +337,6 @@ const WordSwipeQuiz = () => {
 
         setOptions(allOptions);
     };
-
-    const dragPosRef = useRef({ x: 0, y: 0 });
 
     const handleDragStart = (e) => {
         const pos = e.type.includes('mouse')
@@ -404,6 +460,9 @@ const WordSwipeQuiz = () => {
         setSpeedRunTimeLeft(100);
         setPlayerName('');
         setShowRanking(false);
+        setLives(3);
+        setConnectWords([]);
+        setMatchedPairs([]);
     };
 
     const handleRestart = () => {
@@ -425,6 +484,11 @@ const WordSwipeQuiz = () => {
         setSpeedRunTimeLeft(100);
         setIsTimerPaused(false);
         setShowRanking(false);
+
+        if (mode === 'connect') {
+            setLives(3);
+            setMatchedPairs([]);
+        }
 
         setTimeout(() => {
             setShowQuiz(true);
@@ -463,33 +527,45 @@ const WordSwipeQuiz = () => {
                 total={total}
             />;
         }
-        if (isGameStarted && showQuiz) {
-            return (
-                <GameScreen
-                    words={words}
-                    currentIndex={currentIndex}
-                    stage={stage}
-                    score={score}
-                    wrongAnswers={wrongAnswers}
-                    total={total}
-                    timeLeft={gameMode === 'speed' ? speedRunTimeLeft : timeLeft}
-                    timerMode={timerMode}
-                    isTimerPaused={isTimerPaused}
-                    options={options}
-                    feedback={gameMode === 'speed' ? null : feedback}
-                    isDragging={isDragging}
-                    quizRef={quizRef}
-                    cardRef={cardRef}
+        if (isGameStarted) {
+            if (gameMode === 'connect') {
+                return <ConnectingGameScreen 
+                    words={connectWords} 
+                    lives={lives}
+                    onCheckAnswer={checkConnectAnswer}
+                    matchedPairs={matchedPairs}
                     resetGame={resetGame}
-                    speakWord={speakWord}
-                    togglePause={togglePause}
-                    getTimerColor={getTimerColor}
-                    handleDragStart={handleDragStart}
-                    handleDragMove={handleDragMove}
-                    handleDragEnd={handleDragEnd}
-                    gameMode={gameMode}
-                />
-            );
+                />;
+            }
+            if (showQuiz) {
+                return (
+                    <GameScreen
+                        words={words}
+                        currentIndex={currentIndex}
+                        stage={stage}
+                        score={score}
+                        wrongAnswers={wrongAnswers}
+                        total={total}
+                        timeLeft={gameMode === 'speed' ? speedRunTimeLeft : timeLeft}
+                        timerMode={timerMode}
+                        isTimerPaused={isTimerPaused}
+                        options={options}
+                        feedback={gameMode === 'speed' ? null : feedback}
+                        isDragging={isDragging}
+                        quizRef={quizRef}
+                        cardRef={cardRef}
+                        resetGame={resetGame}
+                        speakWord={speakWord}
+                        togglePause={togglePause}
+                        getTimerColor={getTimerColor}
+                        handleDragStart={handleDragStart}
+
+                        handleDragMove={handleDragMove}
+                        handleDragEnd={handleDragEnd}
+                        gameMode={gameMode}
+                    />
+                );
+            }
         }
         return <HomeScreen onStartGame={startGame} isLoading={isLoading} />;
     };

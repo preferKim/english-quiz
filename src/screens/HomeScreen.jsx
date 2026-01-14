@@ -64,6 +64,16 @@ const HomeScreen = ({ onStartGame, isLoading }) => {
                     >
                         ⚡️ 스피드 모드
                     </button>
+                    <button
+                        onClick={() => setGameMode('connect')}
+                        className={`px-6 py-3 rounded-xl font-bold transition ${
+                            gameMode === 'connect'
+                                ? 'bg-blue-500 text-white shadow-lg scale-105'
+                                : 'bg-gray-200 text-gray-600'
+                        }`}
+                    >
+                        🔗 연결 모드
+                    </button>
                 </div>
             </div>
 
