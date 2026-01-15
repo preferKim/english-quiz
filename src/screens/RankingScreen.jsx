@@ -82,9 +82,17 @@ const RankingScreen = ({
     const renderConnectModeResult = () => (
         <>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-cyan-600 mb-4 leading-tight">
-                ✨ 게임 결과 ✨
+                {lives > 0 ? '✨ 게임 결과 ✨' : '😭 게임 실패 😭'}
             </h2>
-            <p className="text-gray-600 mb-8">모든 단어를 성공적으로 연결했습니다!</p>
+            <p className="text-gray-600 mb-8">
+                {lives > 0 ? '모든 단어를 성공적으로 연결했습니다!' : (
+                    <>
+                        단어 연결에 실패 하였습니다.
+                        <br />
+                        다시 도전하세요
+                    </>
+                )}
+            </p>
     
             <div className="rounded-xl border-2 border-cyan-100 bg-cyan-50 p-6 space-y-4 text-left">
                 <div className="flex justify-between items-center text-lg">
