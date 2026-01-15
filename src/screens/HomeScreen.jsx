@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Button from '../components/Button';
 
 const HomeScreen = ({ onStartGame, isLoading }) => {
     const [gameMode, setGameMode] = useState('normal');
@@ -41,36 +42,30 @@ const HomeScreen = ({ onStartGame, isLoading }) => {
             <div className="mb-6">
                 <p className="text-xl font-bold text-primary-dark mb-4">1. 게임 모드를 선택하세요!</p>
                 <div className="flex justify-center gap-2">
-                    <button
+                    <Button
                         onClick={() => setGameMode('normal')}
-                        className={`px-6 py-3 rounded-xl font-bold transition ${
-                            gameMode === 'normal' 
-                                ? 'bg-normal-light text-gray-800 shadow-lg scale-105' 
-                                : 'bg-gray-200 text-gray-600'
-                        }`}
+                        variant="mode"
+                        mode="normal"
+                        isActive={gameMode === 'normal'}
                     >
                         🎓<br />일반<br />모드
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => setGameMode('speed')}
-                        className={`px-6 py-3 rounded-xl font-bold transition ${
-                            gameMode === 'speed' 
-                                ? 'bg-speed-light text-gray-800 shadow-lg scale-105' 
-                                : 'bg-gray-200 text-gray-600'
-                        }`}
+                        variant="mode"
+                        mode="speed"
+                        isActive={gameMode === 'speed'}
                     >
                         ⚡️<br />경쟁<br />모드
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => setGameMode('connect')}
-                        className={`px-6 py-3 rounded-xl font-bold transition ${
-                            gameMode === 'connect'
-                                ? 'bg-connect-light text-gray-800 shadow-lg scale-105'
-                                : 'bg-gray-200 text-gray-600'
-                        }`}
+                        variant="mode"
+                        mode="connect"
+                        isActive={gameMode === 'connect'}
                     >
                         🔗<br />연결<br />모드
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -98,27 +93,30 @@ const HomeScreen = ({ onStartGame, isLoading }) => {
                     도전할 레벨을 골라보세요!
                 </p>
                 <div className="grid grid-cols-3 gap-2">
-                    <button
+                    <Button
                         onClick={() => onStartGame(playerName, 'easy', gameMode)}
                         disabled={isStartDisabled}
-                        className="px-2 py-4 bg-success text-gray-800 text-sm font-bold rounded-2xl hover:bg-success-dark transition shadow-[0_4px_0_theme(colors.success.dark)] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="threedee"
+                        color="primary"
                     >
                         🐣<br/>병아리반
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => onStartGame(playerName, 'medium', gameMode)}
                         disabled={isStartDisabled}
-                        className="px-2 py-4 bg-speed text-gray-800 text-sm font-bold rounded-2xl hover:bg-speed-dark transition shadow-[0_4px_0_theme(colors.speed.dark)] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="threedee"
+                        color="secondary"
                     >
                         🐰<br/>토끼반
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => onStartGame(playerName, 'hard', gameMode)}
                         disabled={isStartDisabled}
-                        className="px-2 py-4 bg-danger text-gray-800 text-sm font-bold rounded-2xl hover:bg-danger-dark transition shadow-[0_4px_0_theme(colors.danger.dark)] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="threedee"
+                        color="danger"
                     >
                         🐯<br/>호랑이반
-                    </button>
+                    </Button>
                 </div>
                 {isLoading && (
                     <p className="text-primary mt-4 font-medium animate-pulse">단어 카드를 가져오고 있어요...</p>
