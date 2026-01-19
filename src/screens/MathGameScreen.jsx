@@ -9,28 +9,41 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
   const [score, setScore] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Added state
 
   useEffect(() => {
     const selectedDifficulty = difficulty || 'easy';
     const selectedTopicLevel = topicLevel || 1; // Default to 1 if not provided
 
+    setIsLoading(true); // Set loading to true at the start
+
     fetch(`/words/math_${selectedDifficulty}.json`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+            // If the file doesn't exist, res.json() will likely fail, so catch here
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
+        let finalQuestions = [];
         if (data.length === 0) {
-          console.warn(`No questions found for difficulty: ${selectedDifficulty}`);
-          setQuestions([]);
+          console.warn(`No questions found in file for difficulty: ${selectedDifficulty}`);
         } else {
           // Filter questions by topicLevel
-          const filteredQuestions = data.filter(q => q.level === selectedTopicLevel);
-          if (filteredQuestions.length === 0) {
+          finalQuestions = data.filter(q => q.level === selectedTopicLevel);
+          if (finalQuestions.length === 0) {
               console.warn(`No questions found for topic level ${selectedTopicLevel} in difficulty ${selectedDifficulty}.`);
-              // Maybe show a message to the user
           }
-          setQuestions(filteredQuestions);
         }
+        setQuestions(finalQuestions);
+        setIsLoading(false); // Set loading to false after data is processed
       })
-      .catch(error => console.error(`Failed to load math problems for difficulty ${selectedDifficulty}:`, error));
+      .catch(error => {
+        console.error(`Failed to load math problems for difficulty ${selectedDifficulty}:`, error);
+        setQuestions([]); // Ensure questions is empty on error
+        setIsLoading(false); // Set loading to false on error
+      });
   }, [difficulty, topicLevel]);
 
   const handleAnswerSelect = (option) => {
@@ -64,10 +77,29 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
     setShowHint(false); // Reset hint visibility
   };
 
-  if (questions.length === 0) {
+  if (isLoading) { // Check isLoading first
     return (
       <div className="flex items-center justify-center min-h-screen">
         Loading...
+      </div>
+    );
+  }
+
+  if (questions.length === 0) { // If not loading and no questions, show "준비중입니다."
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 text-center">
+          <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-4">준비중입니다.</h2>
+              <p className="text-xl text-gray-700 mb-6">
+                  선택하신 난이도와 주제에 해당하는 문제가 없습니다.
+              </p>
+              <button
+                  onClick={onBack}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              >
+                  돌아가기
+              </button>
+          </div>
       </div>
     );
   }
