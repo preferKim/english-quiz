@@ -20,15 +20,18 @@ const Button = ({
 
     const colorStyles = {
         primary:
-            'bg-success text-gray-800 hover:bg-success-dark shadow-[0_4px_0_theme(colors.success.dark)]',
+            'bg-primary text-white hover:bg-primary-dark shadow-[0_4px_0_theme(colors.primary.dark)]',
         secondary:
-            'bg-speed text-gray-800 hover:bg-speed-dark shadow-[0_4px_0_theme(colors.speed.dark)]',
+            'bg-normal text-white hover:bg-normal-dark shadow-[0_4px_0_theme(colors.normal.dark)]',
         danger:
-            'bg-danger text-gray-800 hover:bg-danger-dark shadow-[0_4px_0_theme(colors.danger.dark)]',
+            'bg-danger text-white hover:bg-danger-dark shadow-[0_4px_0_theme(colors.danger.dark)]',
         google:
             'bg-google text-gray-800 hover:bg-google-dark shadow-[0_4px_0_theme(colors.google.dark)]',
+        success:
+            'bg-success text-white hover:bg-success-dark shadow-[0_4px_0_theme(colors.success.dark)]',
+        speed:
+            'bg-speed text-white hover:bg-speed-dark shadow-[0_4px_0_theme(colors.speed.dark)]',
         normal: 'bg-normal-light text-gray-800 shadow-lg scale-105',
-        speed: 'bg-speed-light text-gray-800 shadow-lg scale-105',
         connect: 'bg-connect-light text-gray-800 shadow-lg scale-105',
         inactive: 'bg-white/10 text-white hover:bg-white/20',
     };
