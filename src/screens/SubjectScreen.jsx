@@ -1,51 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../components/Button';
 import { supabase } from '../supabaseClient';
-import { usePlayer } from '../context/PlayerContext';
 import PlayerStats from '../components/PlayerStats';
-import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft
 
-const HomeScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLoading, user, onNavigate, onBackToSubjects }) => {
-    const [gameMode, setGameMode] = useState('normal');
-    const [playerName, setPlayerName] = useState('');
+const SubjectScreen = ({ onSubjectSelect, onSignUp, onLogin, onLogout, user, onNavigate }) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [authMode, setAuthMode] = useState('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [nickname, setNickname] = useState('');
-
-    useEffect(() => {
-        if (user?.user_metadata?.name) {
-            setPlayerName(user.user_metadata.name);
-        } else {
-            setPlayerName('');
-        }
-    }, [user]);
-
-    const isStartDisabled = isLoading || !playerName;
-
-    const InfoCard = ({ icon, title, description }) => (
-        <div className="flex items-center gap-4 bg-white/5 p-3 rounded-xl">
-            <div className="text-3xl">{icon}</div>
-            <div>
-                <div className="font-bold text-gray-100">{title}</div>
-                <div className="text-gray-300 text-sm">{description}</div>
-            </div>
-        </div>
-    );
-
-    const renderModeInfo = () => {
-        switch (gameMode) {
-            case 'normal':
-                return <InfoCard icon="🎓" title="일반 모드" description="발음을 듣고, 뜻을 확인하며 단어를 암기해보세요." />;
-            case 'speed':
-                return <InfoCard icon="⚡️" title="경쟁 모드" description="100초 동안 최대한 많은 문제를 풀어보세요. 오답 시 점수가 차감됩니다." />;
-            case 'connect':
-                return <InfoCard icon="🔗" title="연결 모드" description="제시된 단어와 뜻을 올바르게 연결하세요. 목숨은 3개입니다." />;
-            default:
-                return null;
-        }
-    };
 
     const handleAuthSubmit = (e) => {
         if (e) e.preventDefault();
@@ -61,6 +24,14 @@ const HomeScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLoading, user,
         await supabase.auth.signInWithOAuth({
             provider: 'google',
         });
+    };
+
+    const handleSubjectClick = (subject) => {
+        if (subject === 'english') {
+            onSubjectSelect(subject);
+        } else {
+            alert('아직 준비되지 않은 과목입니다.');
+        }
     };
 
     if (isAuthOpen) {
@@ -127,14 +98,6 @@ const HomeScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLoading, user,
 
     return (
         <div className="glass-card p-6 sm:p-12 text-center relative">
-            <div className="absolute top-4 left-4 z-10">
-                <button
-                    onClick={onBackToSubjects}
-                    className="text-sm font-semibold text-gray-200 hover:text-white px-3 py-1.5 rounded-full border border-white/40 hover:border-white/80 bg-black/20 hover:bg-black/40 transition-all flex items-center"
-                >
-                    <ArrowLeft size={16} className="mr-1" /> 과목선택하기
-                </button>
-            </div>
             <div className="absolute top-4 right-4 z-10">
                 {!user ? (
                     <button 
@@ -175,89 +138,26 @@ const HomeScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLoading, user,
             )}
 
             <div className="mb-6">
-                <p className="text-xl font-bold text-white mb-4">1. 게임 모드를 선택하세요!</p>
-                <div className="flex justify-center gap-2">
-                    <Button
-                        onClick={() => setGameMode('normal')}
-                        variant="mode"
-                        mode="normal"
-                        isActive={gameMode === 'normal'}
-                    >
-                        🎓<br />일반<br />모드
+                <p className="text-xl font-bold text-white mb-4">학습할 과목을 선택하세요!</p>
+                <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+                    <Button onClick={() => handleSubjectClick('korean')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center" disabled={true}>
+                        <span className="text-2xl">📖</span><br/>국어<br/><span className="text-sm font-light opacity-70">준비중</span>
                     </Button>
-                    <Button
-                        onClick={() => setGameMode('speed')}
-                        variant="mode"
-                        mode="speed"
-                        isActive={gameMode === 'speed'}
-                    >
-                        ⚡️<br />경쟁<br />모드
+                    <Button onClick={() => handleSubjectClick('english')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
+                        <span className="text-2xl">🔤</span><br/>영어
                     </Button>
-                    <Button
-                        onClick={() => setGameMode('connect')}
-                        variant="mode"
-                        mode="connect"
-                        isActive={gameMode === 'connect'}
-                    >
-                        🔗<br />연결<br />모드
+                    <Button onClick={() => handleSubjectClick('math')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center" disabled={true}>
+                        <span className="text-2xl">➕</span><br/>수학<br/><span className="text-sm font-light opacity-70">준비중</span>
+                    </Button>
+                    <Button onClick={() => handleSubjectClick('social')} variant="threedee" color="success" className="w-full h-28 flex flex-col items-center justify-center" disabled={true}>
+                        <span className="text-2xl">🏛️</span><br/>사회<br/><span className="text-sm font-light opacity-70">준비중</span>
+                    </Button>
+                    <Button onClick={() => handleSubjectClick('science')} variant="threedee" color="speed" className="w-full h-28 flex flex-col items-center justify-center" disabled={true}>
+                        <span className="text-2xl">🔬</span><br/>과학<br/><span className="text-sm font-light opacity-70">준비중</span>
                     </Button>
                 </div>
-            </div>
-
-            <div className="bg-black/10 rounded-2xl p-6 mb-6 text-left max-w-md mx-auto border-2 border-white/10">
-                {renderModeInfo()}
-            </div>
-
-            <div className="mb-6">
-                <label htmlFor="playerName" className="text-xl font-bold text-white mb-4 block">2. 도전자의 이름을 알려주세요!</label>
-                <input
-                    id="playerName"
-                    type="text"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    placeholder="예: 아이유"
-                    className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
-                />
-            </div>
-
-            <div className="mb-4">
-                <p className="text-xl font-bold text-white mb-4">
-                    3. 도전할 레벨을 골라보세요!
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                    <Button
-                        onClick={() => onStartGame(playerName, 'easy', gameMode)}
-                        disabled={isStartDisabled}
-                        variant="threedee"
-                        color="primary"
-                    >
-                        🐣<br/>병아리반
-                    </Button>
-                    <Button
-                        onClick={() => onStartGame(playerName, 'medium', gameMode)}
-                        disabled={isStartDisabled}
-                        variant="threedee"
-                        color="secondary"
-                    >
-                        🐰<br/>토끼반
-                    </Button>
-                    <Button
-                        onClick={() => onStartGame(playerName, 'hard', gameMode)}
-                        disabled={isStartDisabled}
-                        variant="threedee"
-                        color="danger"
-                    >
-                        🐯<br/>호랑이반
-                    </Button>
-                </div>
-                {isLoading && (
-                    <p className="text-primary-light mt-4 font-medium animate-pulse">단어 카드를 가져오고 있어요...</p>
-                )}
-                {!playerName && (
-                    <p className="text-danger-light mt-4 font-medium">이름 입력이 필수입니다.</p>
-                )}
             </div>
         </div>
     );
 };
-export default HomeScreen;
+export default SubjectScreen;

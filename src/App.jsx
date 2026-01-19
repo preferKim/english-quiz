@@ -4,6 +4,7 @@ import HomeScreen from './screens/HomeScreen';
 import GameScreen from './screens/GameScreen';
 import RankingScreen from './screens/RankingScreen';
 import ConnectingGameScreen from './screens/ConnectingGameScreen';
+import SubjectScreen from './screens/SubjectScreen';
 import TamagotchiScreen from './screens/TamagotchiScreen';
 import { usePlayer } from './context/PlayerContext';
 import LevelUpNotification from './components/LevelUpNotification';
@@ -206,6 +207,7 @@ const defaultWords = [
     const [speedRankings, setSpeedRankings] = useState([]);
     const [user, setUser] = useState(null);
     const [currentDescription, setCurrentDescription] = useState('');
+    const [screen, setScreen] = useState('subjects'); // 'subjects' vs 'modes'
 
     useEffect(() => {
         if (status === 'playing' && gameMode === 'normal' && state.levelDescriptions) {
@@ -305,6 +307,7 @@ const defaultWords = [
 
     const resetGame = () => {
         dispatch({ type: 'RESET_GAME' });
+        setScreen('subjects');
     };
 
     const handleRestart = () => {
@@ -477,7 +480,7 @@ const defaultWords = [
             const currentWord = words[currentIndex];
             speakWord(currentWord.english, 1, () => {
                 if (currentWord.example) {
-                    speakWord(currentWord.example, 1, handleNext);1
+                    speakWord(currentWord.example, 1, handleNext);
                 } else {
                     handleNext();
                 }
@@ -718,12 +721,31 @@ const defaultWords = [
         }
     };
 
+    const handleSubjectSelect = (subject) => {
+        if (subject === 'english') {
+            setScreen('modes');
+        } else {
+            alert('아직 준비되지 않았습니다.');
+        }
+    };
+
     const renderContent = () => {
+        if (screen === 'subjects') {
+            return <SubjectScreen 
+                onSubjectSelect={handleSubjectSelect}
+                onSignUp={handleSignUp}
+                onLogin={handleLogin}
+                onLogout={handleLogout}
+                user={user}
+                onNavigate={handleNavigate}
+            />;
+        }
+
         switch (status) {
             case 'idle':
-                return <HomeScreen onStartGame={startGame} onSignUp={handleSignUp} onLogin={handleLogin} onLogout={handleLogout} isLoading={false} user={user} onNavigate={handleNavigate} />;
+                return <HomeScreen onStartGame={startGame} onSignUp={handleSignUp} onLogin={handleLogin} onLogout={handleLogout} isLoading={false} user={user} onNavigate={handleNavigate} onBackToSubjects={() => setScreen('subjects')} />;
             case 'loading':
-                return <HomeScreen onStartGame={startGame} onSignUp={handleSignUp} onLogin={handleLogin} onLogout={handleLogout} isLoading={true} user={user} onNavigate={handleNavigate} />;
+                return <HomeScreen onStartGame={startGame} onSignUp={handleSignUp} onLogin={handleLogin} onLogout={handleLogout} isLoading={true} user={user} onNavigate={handleNavigate} onBackToSubjects={() => setScreen('subjects')} />;
             case 'playing':
                 if (gameMode === 'connect') {
                     return <ConnectingGameScreen 
