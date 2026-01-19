@@ -12,7 +12,7 @@ const LevelUpNotification = () => {
       const timer = setTimeout(() => {
         setIsVisible(false);
         resetLevelUp(); // Reset the flag in context after animation
-      }, 3000); // Show for 3 seconds
+      }, 1000); // Show for 1 second
 
       return () => clearTimeout(timer);
     }

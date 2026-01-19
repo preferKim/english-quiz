@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, ArrowLeft, Clock } from 'lucide-react';
+import PlayerStats from '../components/PlayerStats';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = (array) => {
@@ -111,7 +112,8 @@ const ConnectingGameScreen = ({ words, lives, matchedPairs, onCheckAnswer, reset
 
     return (
         <div className="w-full max-w-4xl mx-auto p-4 flex flex-col gap-2">
-             <div className="glass-card flex justify-between items-center p-4">
+            <PlayerStats className="mb-2" />
+            <div className="glass-card flex justify-between items-center p-4">
                 <button onClick={resetGame} className="text-gray-300 hover:text-white p-2 rounded-full transition">
                     <ArrowLeft size={28} />
                 </button>

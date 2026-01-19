@@ -361,11 +361,30 @@ const defaultWords = [
     const checkConnectAnswer = (word1, word2) => {
         dispatch({ type: 'CHECK_CONNECT_ANSWER', payload: { word1, word2 } });
         if (word1.english === word2.english) {
+            playCorrectSound(); // Play correct sound
+            // --- Add XP logic here ---
+            let xpAmount = 0;
+            switch (difficulty) {
+                case 'easy':
+                    xpAmount = 1;
+                    break;
+                case 'medium':
+                    xpAmount = 2;
+                    break;
+                case 'hard':
+                    xpAmount = 3;
+                    break;
+                default:
+                    xpAmount = 1; // Default to easy if difficulty is not set
+            }
+            addXp(xpAmount);
+            // -------------------------
             const newMatchedPairs = [...matchedPairs, word1.english];
             if (newMatchedPairs.length === connectWords.length) {
                 dispatch({ type: 'FINISH_GAME', payload: { user } });
             }
         } else {
+            playWarningSound(); // Play wrong sound
             const newLives = lives - 1;
             if (newLives <= 0) {
                 dispatch({ type: 'FINISH_GAME', payload: { user } });
@@ -490,6 +509,20 @@ const defaultWords = [
         } else {
             if (onComplete) onComplete();
         }
+    };
+
+    const playCorrectSound = () => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 1200; // Higher frequency for a "ding" sound
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime); // Slightly louder
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1); // Short duration
     };
 
     const playWarningSound = () => {
