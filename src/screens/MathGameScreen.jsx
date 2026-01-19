@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Check, X } from 'lucide-react';
+import MathRenderer from '../components/MathRenderer';
 
 const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
   const [questions, setQuestions] = useState([]);
@@ -9,18 +10,17 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
   const [score, setScore] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Added state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const selectedDifficulty = difficulty || 'easy';
     const selectedTopicLevel = topicLevel || 1; // Default to 1 if not provided
 
-    setIsLoading(true); // Set loading to true at the start
+    setIsLoading(true);
 
     fetch(`/words/math_${selectedDifficulty}.json`)
       .then(res => {
         if (!res.ok) {
-            // If the file doesn't exist, res.json() will likely fail, so catch here
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
@@ -30,19 +30,18 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
         if (data.length === 0) {
           console.warn(`No questions found in file for difficulty: ${selectedDifficulty}`);
         } else {
-          // Filter questions by topicLevel
           finalQuestions = data.filter(q => q.level === selectedTopicLevel);
           if (finalQuestions.length === 0) {
               console.warn(`No questions found for topic level ${selectedTopicLevel} in difficulty ${selectedDifficulty}.`);
           }
         }
         setQuestions(finalQuestions);
-        setIsLoading(false); // Set loading to false after data is processed
+        setIsLoading(false);
       })
       .catch(error => {
         console.error(`Failed to load math problems for difficulty ${selectedDifficulty}:`, error);
-        setQuestions([]); // Ensure questions is empty on error
-        setIsLoading(false); // Set loading to false on error
+        setQuestions([]);
+        setIsLoading(false);
       });
   }, [difficulty, topicLevel]);
 
@@ -62,7 +61,7 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
-      setShowHint(false); // Reset hint visibility
+      setShowHint(false);
     } else {
       setGameFinished(true);
     }
@@ -74,10 +73,10 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
     setIsAnswered(false);
     setScore(0);
     setGameFinished(false);
-    setShowHint(false); // Reset hint visibility
+    setShowHint(false);
   };
 
-  if (isLoading) { // Check isLoading first
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         Loading...
@@ -85,7 +84,7 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
     );
   }
 
-  if (questions.length === 0) { // If not loading and no questions, show "준비중입니다."
+  if (questions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 text-center">
           <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
@@ -180,19 +179,21 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
                 <p className="text-sm text-gray-500 mb-2">문제 {currentQuestionIndex + 1}/{questions.length}</p>
                 <div className="flex items-center gap-2 mb-4">
                     <p className="text-xl sm:text-2xl font-medium text-gray-800 leading-relaxed">
-                        {currentQuestion.problem}
+                        <MathRenderer text={currentQuestion.problem} />
                     </p>
                     {currentQuestion.hint && (
                         <button
                             onClick={() => setShowHint(!showHint)}
                             className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
                         >
-                            {showHint ? "힌트 숨김" : "힌트보기"}
+                            {showHint ? "힌트 숨기기" : "힌트보기"}
                         </button>
                     )}
                 </div>
                 {showHint && currentQuestion.hint && (
-                    <p className="text-blue-600 text-sm italic mb-4">{currentQuestion.hint}</p>
+                    <p className="text-blue-600 text-sm italic mb-4">
+                      <MathRenderer text={currentQuestion.hint} />
+                    </p>
                 )}
             </div>
 
@@ -205,7 +206,9 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
                         disabled={isAnswered}
                         className={`w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center ${getButtonClass(option)}`}
                     >
-                        <span className="font-medium text-gray-700">{option}</span>
+                        <span className="font-medium text-gray-700">
+                          <MathRenderer text={option} />
+                        </span>
                         {getIcon(option)}
                     </button>
                 ))}
@@ -215,7 +218,9 @@ const MathGameScreen = ({ onBack, difficulty, topicLevel }) => {
             {isAnswered && (
                 <div className="bg-white p-6 rounded-2xl shadow-lg animate-fade-in">
                     <h3 className="font-bold text-lg mb-2">{selectedAnswer === currentQuestion.answer ? "정답입니다!" : "오답입니다."}</h3>
-                    <p className="text-gray-600 mb-4">{currentQuestion.explanation}</p>
+                    <p className="text-gray-600 mb-4">
+                      <MathRenderer text={currentQuestion.explanation} />
+                    </p>
                     <button
                         onClick={handleNextQuestion}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
