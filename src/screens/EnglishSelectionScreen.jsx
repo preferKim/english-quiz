@@ -12,10 +12,12 @@ const EnglishSelectionScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLo
     useEffect(() => {
         if (user?.user_metadata?.name) {
             setPlayerName(user.user_metadata.name);
+        } else if (!user && gameMode === 'speed') {
+            setPlayerName(`손님_${Math.floor(Math.random() * 10000)}`);
         } else {
             setPlayerName('');
         }
-    }, [user]);
+    }, [user, gameMode]);
 
         const InfoCard = ({ icon, title, description }) => (
 
@@ -131,9 +133,19 @@ const EnglishSelectionScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLo
 
     
 
-                <div className="mb-6">
+                                <div className="mb-6">
 
-                    <p className="text-xl font-bold text-white mb-4">1. 게임 모드를 선택하세요!</p>
+    
+
+                                    <p className="text-xl font-bold text-white mb-4">
+
+    
+
+                                        <span className="inline-block border-b-2 border-primary-light pb-1">게임 모드를 선택하세요!</span>
+
+    
+
+                                    </p>
 
                     <div className="flex justify-center gap-2">
 
@@ -199,37 +211,73 @@ const EnglishSelectionScreen = ({ onStartGame, onSignUp, onLogin, onLogout, isLo
 
     
 
-                <div className="mb-6">
-
-                    <label htmlFor="playerName" className="text-xl font-bold text-white mb-4 block">2. 도전자의 이름을 알려주세요!</label>
-
-                    <input
-
-                        id="playerName"
-
-                        type="text"
-
-                        value={playerName}
-
-                        onChange={(e) => setPlayerName(e.target.value)}
-
-                        placeholder="예: 아이유"
-
-                        className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
-
-                    />
-
-                </div>
+                                {gameMode === 'speed' && (
 
     
 
-                <div className="mb-4">
+                                    <div className="mb-6">
 
-                    <p className="text-xl font-bold text-white mb-4">
+    
 
-                        3. 도전할 레벨을 골라보세요!
+                                        <label htmlFor="playerName" className="text-xl font-bold text-white mb-4 block">
+                                            <span className="inline-block border-b-2 border-primary-light pb-1">도전자의 이름을 알려주세요!</span>
+                                        </label>
 
-                    </p>
+    
+
+                                        <input
+
+    
+
+                                            id="playerName"
+
+    
+
+                                            type="text"
+
+    
+
+                                            value={playerName}
+
+    
+
+                                            onChange={(e) => setPlayerName(e.target.value)}
+
+    
+
+                                            placeholder="예: 아이유"
+
+    
+
+                                            className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
+
+    
+
+                                        />
+
+    
+
+                                    </div>
+
+    
+
+                                )}
+
+    
+
+                                <div className="mb-4">
+
+    
+
+                                    <p className="text-xl font-bold text-white mb-4">
+
+    
+
+                                        <span className="inline-block border-b-2 border-primary-light pb-1">도전할 레벨을 골라보세요!</span>
+
+    
+
+                                    </p>
 
                     <div className="grid grid-cols-3 gap-2">
 
