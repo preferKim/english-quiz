@@ -134,7 +134,7 @@ function reducer(state, action) {
             return { ...state, status: 'finished' };
         }
         case 'TIMEOUT':
-            return { ...state, total: state.total + 1, feedback: 'timeout' };
+            return { ...state, total: state.total + 1, wrongAnswers: state.wrongAnswers + 1, feedback: 'timeout' };
         case 'FINISH_GAME': {
             let finalScore = state.score;
             if (state.gameMode === 'speed') {
@@ -438,7 +438,9 @@ const defaultWords = [
     useEffect(() => {
         if (status !== 'playing') return;
 
-        if (gameMode === 'speed' && speedRunTimeLeft === 0) {
+        if (gameMode === 'normal' && timeLeft === 0) {
+            handleTimeout();
+        } else if (gameMode === 'speed' && speedRunTimeLeft === 0) {
             setSpeedRankings(prev => [...prev, { name: playerName, score: score - (wrongAnswers * 5) }].sort((a, b) => b.score - a.score));
             dispatch({ type: 'FINISH_GAME', payload: { user } });
         }
