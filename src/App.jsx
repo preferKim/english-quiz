@@ -819,14 +819,25 @@ const defaultWords = [
                 return <EnglishSelectionScreen onStartGame={startGame} onSignUp={handleSignUp} onLogin={handleLogin} onLogout={handleLogout} isLoading={true} user={user} onNavigate={handleNavigate} onBackToSubjects={() => setScreen('subjects')} />;
             case 'playing':
                 if (gameMode === 'connect') {
-                    return <ConnectingGameScreen 
-                        words={connectWords} 
-                        lives={lives}
-                        onCheckAnswer={checkConnectAnswer}
-                        matchedPairs={matchedPairs}
-                        resetGame={handleExitToSelectionScreen}
-                        time={connectTime}
-                    />;
+                    return (
+                        <div className="relative">
+                            {isPaused && (
+                                <PauseMenu 
+                                    onResume={togglePauseGame} 
+                                    onRestart={handleGameRestart}
+                                    onExit={handleExitToSelectionScreen} 
+                                />
+                            )}
+                            <ConnectingGameScreen 
+                                words={connectWords} 
+                                lives={lives}
+                                onCheckAnswer={checkConnectAnswer}
+                                matchedPairs={matchedPairs}
+                                resetGame={togglePauseGame}
+                                time={connectTime}
+                            />
+                        </div>
+                    );
                 }
                 return (
                     <div className="relative">
