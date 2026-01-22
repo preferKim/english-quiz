@@ -4,7 +4,7 @@ import { ArrowLeft, Clock, Keyboard } from 'lucide-react';
 const words = ["React", "JavaScript", "Tailwind", "Vite", "Supabase", "Component", "Props", "State", "Hook"];
 
 const TypingGame = ({ onBack }) => {
-    const inputRef = useRef(null); // Ref for the input field
+    const inputRef = useRef(null);
 
     const [difficulty, setDifficulty] = useState('easy');
     const [wordList, setWordList] = useState([]);
@@ -27,7 +27,6 @@ const TypingGame = ({ onBack }) => {
             const randomIndex = Math.floor(Math.random() * wordList.length);
             setCurrentWordObj(wordList[randomIndex]);
             setInputValue('');
-            // Ensure input is focused when a new word appears
             inputRef.current?.focus();
         }
     };
@@ -43,15 +42,14 @@ const TypingGame = ({ onBack }) => {
                 setWordList(data);
             } catch (error) {
                 console.error("Failed to fetch words:", error);
-                setWordList([]); // Reset on error
+                setWordList([]);
             }
         };
 
         fetchWords();
-    }, [difficulty]); // Refetch words whenever difficulty changes
+    }, [difficulty]);
 
     useEffect(() => {
-        // Select a new word only when wordList is loaded or difficulty changes
         if (wordList.length > 0) {
             selectNewWord();
         }
@@ -76,10 +74,17 @@ const TypingGame = ({ onBack }) => {
         selectNewWord();
     };
 
-    const toggleHintMode = () => {
+    const toggleHintMode = (e) => {
+        // 이벤트 전파 방지
+        e.preventDefault();
+        e.stopPropagation();
+        
         setIsHintModeOn(!isHintModeOn);
-        // Re-focus the input to keep the keyboard open on mobile
-        inputRef.current?.focus();
+        
+        // requestAnimationFrame을 사용하여 다음 렌더링 사이클에서 포커스
+        requestAnimationFrame(() => {
+            inputRef.current?.focus();
+        });
     };
 
     const handleChange = (e) => {
@@ -95,9 +100,7 @@ const TypingGame = ({ onBack }) => {
         if (currentWordObj.english) {
             const hintLength = Math.ceil(currentWordObj.english.length * 0.3);
             const revealedPart = currentWordObj.english.substring(0, hintLength);
-            // The actual hint string with '_' is generated dynamically in JSX,
-            // so here we just set showHint to true.
-            setHint(revealedPart); // This hint state is not directly used for display, but can be for future use if needed.
+            setHint(revealedPart);
             setIsHintModeOn(true);
         }
     };
@@ -134,7 +137,6 @@ const TypingGame = ({ onBack }) => {
 
     return (
         <div className="glass-card p-6 sm:p-12 text-center h-full flex flex-col justify-between">
-            {/* Header Section */}
             <header className="relative w-full">
                 <button
                     onClick={onBack}
@@ -149,7 +151,6 @@ const TypingGame = ({ onBack }) => {
                 </div>
             </header>
 
-            {/* Main Content Section (takes up all available space) */}
             <main className="flex-grow flex flex-col justify-center items-center w-full">
                 <div className="flex justify-center items-center w-full max-w-md mb-4 space-x-8">
                     <p className="text-xl text-gray-300">
@@ -174,8 +175,8 @@ const TypingGame = ({ onBack }) => {
                         </button>
                     ))}
                 </div>
-                <p className="text-5xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
-                <div className="flex justify-center items-center h-8">
+                <p className="text-4xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
+                <div className="flex justify-center items-center h-8 mb-6">
                     {isHintModeOn && currentWordObj.english && (
                         <div className="flex space-x-1">
                             {currentWordObj.english.split('').map((char, index) => (
@@ -199,10 +200,13 @@ const TypingGame = ({ onBack }) => {
                 </div>
             </main>
 
-            {/* Footer Section (for actions and input) */}
             <footer className="w-full flex flex-col items-center">
                 <div className="flex space-x-4 mb-4">
                     <button
+                        onMouseDown={(e) => {
+                            // 마우스/터치 이벤트에서 기본 동작 방지
+                            e.preventDefault();
+                        }}
                         onClick={toggleHintMode}
                         className={`px-6 py-2 rounded-lg font-bold transition w-32 ${
                             isHintModeOn 
@@ -213,6 +217,9 @@ const TypingGame = ({ onBack }) => {
                         {isHintModeOn ? '힌트 ON' : '힌트 OFF'}
                     </button>
                     <button
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                        }}
                         onClick={handlePass}
                         className="px-6 py-2 rounded-lg font-bold transition w-32 bg-gray-500 text-white hover:bg-gray-600"
                     >
@@ -224,14 +231,12 @@ const TypingGame = ({ onBack }) => {
                     value={inputValue}
                     onChange={handleChange}
                     autoFocus
-                    ref={inputRef} // Attach ref here
+                    ref={inputRef}
                     className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
                 />
             </footer>
         </div>
     );
 };
-
-
 
 export default TypingGame;

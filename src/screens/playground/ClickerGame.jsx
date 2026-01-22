@@ -40,13 +40,18 @@ const ClickerGame = ({ onBack }) => {
         setTargetNumber(problem.target);
         setOptions(problem.options);
         setCurrentSum(0);
-        setTimeRemaining(60);
-        setGameOver(false);
     }, []);
 
-    useEffect(() => {
+    const handleRestart = useCallback(() => {
+        setScore(0);
+        setTimeRemaining(60);
+        setGameOver(false);
         startNewRound();
     }, [startNewRound]);
+
+    useEffect(() => {
+        handleRestart();
+    }, [handleRestart]);
 
     // Game Logic Effect
     useEffect(() => {
@@ -62,21 +67,17 @@ const ClickerGame = ({ onBack }) => {
 
     // Timer Effect
     useEffect(() => {
-        if (gameOver) return;
+        if (gameOver || timeRemaining <= 0) {
+            if (timeRemaining <= 0) setGameOver(true);
+            return;
+        };
 
         const timer = setInterval(() => {
-            setTimeRemaining(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    setGameOver(true);
-                    return 0;
-                }
-                return prev - 1;
-            });
+            setTimeRemaining(prev => prev - 1);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [gameOver, startNewRound]);
+    }, [gameOver, timeRemaining]);
 
 
     const handleNumberClick = (num) => {
@@ -84,10 +85,7 @@ const ClickerGame = ({ onBack }) => {
         setCurrentSum(prev => prev + num);
     };
     
-    const handleRestart = () => {
-        setScore(0);
-        startNewRound();
-    }
+    // The handleRestart function is now defined above with useCallback
 
     return (
         <div className="glass-card p-6 sm:p-12 text-center relative flex flex-col items-center w-full max-w-2xl mx-auto">
