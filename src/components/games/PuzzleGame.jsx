@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Puzzle } from 'lucide-react';
 
 const BOARD_SIZE = 8;
 const ANIMAL_ICONS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
@@ -324,7 +324,9 @@ const PuzzleGame = ({ onBack }) => {
           >
             <ArrowLeft size={20} className="text-gray-300 sm:w-6 sm:h-6" />
           </button>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white whitespace-nowrap">퍼즐 게임</h1>
+          <div className="flex-grow text-center">
+            <Puzzle size={32} className="text-white inline-block" />
+          </div>
           <div className="bg-white/10 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg flex-shrink-0">
             <span className="text-sm sm:text-base md:text-xl font-bold text-white whitespace-nowrap">점수: {score}</span>
           </div>

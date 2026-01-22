@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Hash } from 'lucide-react';
 import Button from '../../components/Button';
 
 const GUESS_LIMIT = 5;
@@ -78,7 +78,7 @@ const GuessingGame = ({ onBack }) => {
             >
                 <ArrowLeft size={24} />
             </button>
-            <h1 className="text-4xl font-bold text-white mb-4">숫자 맞추기 게임</h1>
+            <Hash size={48} className="text-white mb-4" />
 
             <div className="flex gap-4 mb-6">
                 <Button onClick={() => handleModeChange('easy')} variant="mode" mode="success" isActive={mode === 'easy'}>
