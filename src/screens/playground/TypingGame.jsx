@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, Keyboard } from 'lucide-react';
 
 const words = ["React", "JavaScript", "Tailwind", "Vite", "Supabase", "Component", "Props", "State", "Hook"];
 
@@ -127,72 +127,100 @@ const TypingGame = ({ onBack }) => {
     }
 
     return (
-        <div className="glass-card p-6 sm:p-12 text-center relative flex flex-col items-center">
-            <button
-                onClick={onBack}
-                className="absolute top-4 left-4 text-gray-200 hover:text-white transition p-2"
-                title="Back"
-                aria-label="Back"
-            >
-                <ArrowLeft size={24} />
-            </button>
-            
-            <div className="flex justify-center items-center w-full max-w-md mb-8 space-x-8">
-                <p className="text-2xl text-gray-300">
-                    점수: <span className="text-primary-light font-bold">{score}</span>
-                </p>
-                <p className="text-2xl font-bold text-white bg-white/10 px-4 py-2 rounded-lg flex items-center">
-                    <Clock size={24} className="inline-block mr-2" /> {timeLeft}
-                </p>
-            </div>
-            <p className="text-5xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
-            <div className="flex justify-center items-center mb-6 h-8">
-                {isHintModeOn && currentWordObj.english && (
-                    <div className="flex space-x-1">
-                        {currentWordObj.english.split('').map((char, index) => (
-                            <span
-                                key={index}
-                                style={{
-                                    display: 'inline-block',
-                                    width: '1.2em', // Adjust as needed for character width
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid white', // Tailwind primary-light equivalent
-                                    color: index < Math.ceil(currentWordObj.english.length * 0.3) ? 'white' : 'transparent',
-                                    userSelect: 'none', // Prevent selection of transparent text
-                                }}
-                                className="text-xl font-mono"
-                            >
-                                {index < Math.ceil(currentWordObj.english.length * 0.3) ? char : '_'}
-                            </span>
-                        ))}
-                    </div>
-                )}
-            </div>
-            <div className="flex space-x-4 mb-6">
+        <div className="glass-card p-6 sm:p-12 text-center h-full flex flex-col justify-between">
+            {/* Header Section */}
+            <header className="relative w-full">
                 <button
-                    onClick={toggleHintMode}
-                    className={`px-6 py-2 rounded-lg font-bold transition w-32 ${
-                        isHintModeOn 
-                            ? 'bg-green-500 text-white hover:bg-green-600' 
-                            : 'bg-yellow-500 text-white hover:bg-yellow-600'
-                    }`}
+                    onClick={onBack}
+                    className="absolute top-0 left-0 text-gray-200 hover:text-white transition p-2"
+                    title="Back"
+                    aria-label="Back"
                 >
-                    {isHintModeOn ? '힌트 ON' : '힌트 OFF'}
+                    <ArrowLeft size={24} />
                 </button>
-                <button
-                    onClick={handlePass}
-                    className="px-6 py-2 rounded-lg font-bold transition w-32 bg-gray-500 text-white hover:bg-gray-600"
-                >
-                    통과
-                </button>
-            </div>
-            <input
-                type="text"
-                value={inputValue}
-                onChange={handleChange}
-                autoFocus
-                className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
-            />
+                <div className="text-center w-full">
+                    <Keyboard size={48} className="text-white inline-block" />
+                </div>
+            </header>
+
+            {/* Main Content Section (takes up all available space) */}
+            <main className="flex-grow flex flex-col justify-center items-center w-full">
+                <div className="flex justify-center items-center w-full max-w-md mb-4 space-x-8">
+                    <p className="text-xl text-gray-300">
+                        점수: <span className="text-primary-light font-bold">{score}</span>
+                    </p>
+                    <p className="text-xl font-bold text-white bg-white/10 px-3 py-1 rounded-lg flex items-center">
+                        <Clock size={20} className="inline-block mr-2" /> {timeLeft}
+                    </p>
+                </div>
+                 <div className="flex space-x-2 mb-4">
+                    {['easy', 'medium', 'hard'].map((level) => (
+                        <button
+                            key={level}
+                            onClick={() => setDifficulty(level)}
+                            className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+                                difficulty === level
+                                    ? 'bg-primary-light text-white shadow-lg'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            }`}
+                        >
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                        </button>
+                    ))}
+                </div>
+                <p className="text-5xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
+                <div className="flex justify-center items-center h-8">
+                    {isHintModeOn && currentWordObj.english && (
+                        <div className="flex space-x-1">
+                            {currentWordObj.english.split('').map((char, index) => (
+                                <span
+                                    key={index}
+                                    style={{
+                                        display: 'inline-block',
+                                        width: '1.2em',
+                                        textAlign: 'center',
+                                        borderBottom: '2px solid white',
+                                        color: index < Math.ceil(currentWordObj.english.length * 0.3) ? 'white' : 'transparent',
+                                        userSelect: 'none',
+                                    }}
+                                    className="text-xl font-mono"
+                                >
+                                    {index < Math.ceil(currentWordObj.english.length * 0.3) ? char : '_'}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </main>
+
+            {/* Footer Section (for actions and input) */}
+            <footer className="w-full flex flex-col items-center">
+                <div className="flex space-x-4 mb-4">
+                    <button
+                        onClick={toggleHintMode}
+                        className={`px-6 py-2 rounded-lg font-bold transition w-32 ${
+                            isHintModeOn 
+                                ? 'bg-green-500 text-white hover:bg-green-600' 
+                                : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                        }`}
+                    >
+                        {isHintModeOn ? '힌트 ON' : '힌트 OFF'}
+                    </button>
+                    <button
+                        onClick={handlePass}
+                        className="px-6 py-2 rounded-lg font-bold transition w-32 bg-gray-500 text-white hover:bg-gray-600"
+                    >
+                        통과
+                    </button>
+                </div>
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleChange}
+                    autoFocus
+                    className="w-full max-w-xs mx-auto px-4 py-3 text-center text-lg font-medium bg-white/5 border-2 border-white/10 rounded-xl text-white focus:ring-2 focus:ring-primary focus:border-primary transition"
+                />
+            </footer>
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Target } from 'lucide-react';
 import Button from '../../components/Button';
 
 const generateProblem = () => {
@@ -94,7 +94,7 @@ const ClickerGame = ({ onBack }) => {
             <button onClick={onBack} className="absolute top-4 left-4 text-gray-200 hover:text-white transition p-2">
                 <ArrowLeft size={24} />
             </button>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">목표 숫자를 만들어라!</h1>
+            <Target size={48} className="text-white mb-4" />
             
             <div className="flex justify-between w-full max-w-sm text-white mb-6">
                 <div className="text-lg">점수: <span className="font-bold">{score}</span></div>

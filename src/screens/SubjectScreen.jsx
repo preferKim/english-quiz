@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Gamepad2 } from 'lucide-react';
+import { BookOpen, Gamepad2, Target, Keyboard, Hash, Puzzle } from 'lucide-react';
 import Button from '../components/Button';
 import HeaderSection from '../components/HeaderSection';
 
@@ -58,16 +58,16 @@ const SubjectScreen = ({ onSubjectSelect, onSignUp, onLogin, onLogout, user, onN
                     </div>
                     <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
                         <Button onClick={() => handleSubjectClick('playground-clicker')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">🖱️</span><br/>클릭 게임
+                            <Target size={28} className="text-white mb-1" /><br/>클릭<br/>게임
                         </Button>
                         <Button onClick={() => handleSubjectClick('playground-typing')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">⌨️</span><br/>타이핑 게임
+                            <Keyboard size={28} className="text-white mb-1" /><br/>타이핑<br/>게임
                         </Button>
                         <Button onClick={() => handleSubjectClick('playground-guessing')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">🤔</span><br/>숫자 맞추기
+                            <Hash size={28} className="text-white mb-1" /><br/>맞추기<br/>게임
                         </Button>
                         <Button onClick={() => handleSubjectClick('playground-puzzle')} variant="threedee" color="warning" className="w-full h-28 flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-orange-500">
-                            <span className="text-2xl">🧩</span><br/>퍼즐 게임
+                            <Puzzle size={28} className="text-white mb-1" /><br/>퍼즐<br/>게임
                         </Button>
                     </div>
                 </div>
