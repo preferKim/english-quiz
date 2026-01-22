@@ -1,25 +1,136 @@
-import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 import Button from '../../components/Button';
 
+const generateProblem = () => {
+    const target = Math.floor(Math.random() * 40) + 20; // Target between 20 and 59
+
+    let components = [];
+    let currentSum = 0;
+
+    // Create components that sum up to the target
+    while (currentSum < target) {
+        let diff = target - currentSum;
+        let maxVal = Math.min(diff, 12); // Max value for a single button is 12
+        let newVal = Math.floor(Math.random() * maxVal) + 1;
+        components.push(newVal);
+        currentSum += newVal;
+    }
+
+    // Add some dummy numbers
+    const numDummies = Math.floor(Math.random() * 2) + 2; // 2-3 dummy numbers
+    for (let i = 0; i < numDummies; i++) {
+        components.push(Math.floor(Math.random() * 12) + 1);
+    }
+    
+    // Shuffle the options
+    return { target, options: components.sort(() => Math.random() - 0.5) };
+};
+
 const ClickerGame = ({ onBack }) => {
-    const [count, setCount] = useState(0);
+    const [targetNumber, setTargetNumber] = useState(0);
+    const [currentSum, setCurrentSum] = useState(0);
+    const [options, setOptions] = useState([]);
+    const [score, setScore] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(60);
+    const [gameOver, setGameOver] = useState(false);
+
+    const startNewRound = useCallback(() => {
+        const problem = generateProblem();
+        setTargetNumber(problem.target);
+        setOptions(problem.options);
+        setCurrentSum(0);
+        setTimeRemaining(60);
+        setGameOver(false);
+    }, []);
+
+    useEffect(() => {
+        startNewRound();
+    }, [startNewRound]);
+
+    // Game Logic Effect
+    useEffect(() => {
+        if (gameOver) return;
+
+        if (currentSum === targetNumber) {
+            setScore(prev => prev + 1);
+            startNewRound();
+        } else if (currentSum > targetNumber) {
+            setGameOver(true);
+        }
+    }, [currentSum, targetNumber, gameOver, startNewRound]);
+
+    // Timer Effect
+    useEffect(() => {
+        if (gameOver) return;
+
+        const timer = setInterval(() => {
+            setTimeRemaining(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setGameOver(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [gameOver, startNewRound]);
+
+
+    const handleNumberClick = (num) => {
+        if (gameOver) return;
+        setCurrentSum(prev => prev + num);
+    };
+    
+    const handleRestart = () => {
+        setScore(0);
+        startNewRound();
+    }
 
     return (
-        <div className="glass-card p-6 sm:p-12 text-center relative flex flex-col items-center">
-            <button
-                onClick={onBack}
-                className="absolute top-4 left-4 text-gray-200 hover:text-white transition p-2"
-                title="Back"
-                aria-label="Back"
-            >
+        <div className="glass-card p-6 sm:p-12 text-center relative flex flex-col items-center w-full max-w-2xl mx-auto">
+            <button onClick={onBack} className="absolute top-4 left-4 text-gray-200 hover:text-white transition p-2">
                 <ArrowLeft size={24} />
             </button>
-            <h1 className="text-4xl font-bold text-white mb-8">클릭 게임</h1>
-            <p className="text-6xl font-bold text-white mb-8">{count}</p>
-            <Button onClick={() => setCount(count + 1)} variant="threedee" color="primary">
-                클릭!
-            </Button>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">목표 숫자를 만들어라!</h1>
+            
+            <div className="flex justify-between w-full max-w-sm text-white mb-6">
+                <div className="text-lg">점수: <span className="font-bold">{score}</span></div>
+                <div className="text-lg">남은 시간: <span className="font-bold">{timeRemaining}</span></div>
+            </div>
+
+            {!gameOver ? (
+                <div className='w-full'>
+                    <div className="bg-black/20 p-4 rounded-xl mb-6">
+                        <p className="text-lg text-gray-300">목표</p>
+                        <p className="text-5xl font-bold text-white">{targetNumber}</p>
+                        <p className="text-lg text-gray-300 mt-2">현재 합계</p>
+                        <p className="text-3xl font-bold text-yellow-300">{currentSum}</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {options.map((num, index) => (
+                            <Button key={index} onClick={() => handleNumberClick(num)} variant="threedee" color="primary" className="h-20 text-2xl">
+                                +{num}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center h-full min-h-[300px]">
+                    <h2 className="text-4xl font-bold text-red-400 mb-2">게임 오버!</h2>
+                    <p className="text-xl text-white mb-6">
+                        {currentSum > targetNumber ? `목표(${targetNumber})를 초과했습니다!` : '시간 초과!'}
+                    </p>
+                    <p className="text-2xl text-white mb-8">최종 점수: {score}</p>
+                    <Button onClick={handleRestart} variant="threedee" color="secondary" className="flex items-center gap-2">
+                        <RefreshCw size={20} />
+                        재시도
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
