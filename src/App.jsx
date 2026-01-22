@@ -218,6 +218,17 @@ const defaultWords = [
     const [mathGameKey, setMathGameKey] = useState(0);
 
     useEffect(() => {
+        const setVh = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        window.addEventListener('resize', setVh);
+        setVh(); // Initial set
+
+        return () => window.removeEventListener('resize', setVh);
+    }, []);
+
+    useEffect(() => {
         if (status === 'playing' && gameMode === 'normal' && state.levelDescriptions) {
             const key = `english_${difficulty}_${stage}`;
             const description = state.levelDescriptions[key] || `Level ${stage}`; // Fallback
@@ -921,7 +932,7 @@ const defaultWords = [
     };
 
     return (
-        <div className="w-full min-h-screen flex items-center justify-center overflow-x-hidden">
+        <div className="w-full min-h-[calc(var(--vh,1vh)*100)] flex items-center justify-center overflow-x-hidden">
             <div className="max-w-2xl w-full">
                 {renderContent()}
             </div>

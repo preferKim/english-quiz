@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
 
 const words = ["React", "JavaScript", "Tailwind", "Vite", "Supabase", "Component", "Props", "State", "Hook"];
 
@@ -137,12 +137,12 @@ const TypingGame = ({ onBack }) => {
                 <ArrowLeft size={24} />
             </button>
             
-            <div className="flex justify-between items-center w-full max-w-sm mb-8">
+            <div className="flex justify-center items-center w-full max-w-md mb-8 space-x-8">
                 <p className="text-2xl text-gray-300">
                     점수: <span className="text-primary-light font-bold">{score}</span>
                 </p>
-                <p className="text-2xl font-bold text-white bg-white/10 px-4 py-2 rounded-lg">
-                    남은 시간: {timeLeft}
+                <p className="text-2xl font-bold text-white bg-white/10 px-4 py-2 rounded-lg flex items-center">
+                    <Clock size={24} className="inline-block mr-2" /> {timeLeft}
                 </p>
             </div>
             <p className="text-5xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
