@@ -137,27 +137,14 @@ const TypingGame = ({ onBack }) => {
                 <ArrowLeft size={24} />
             </button>
             
-            <div className="absolute top-4 right-4 text-2xl font-bold text-white bg-white/10 px-4 py-2 rounded-lg">
-                남은 시간: {timeLeft}
+            <div className="flex justify-between items-center w-full max-w-sm mb-8">
+                <p className="text-2xl text-gray-300">
+                    점수: <span className="text-primary-light font-bold">{score}</span>
+                </p>
+                <p className="text-2xl font-bold text-white bg-white/10 px-4 py-2 rounded-lg">
+                    남은 시간: {timeLeft}
+                </p>
             </div>
-
-            <h1 className="text-4xl font-bold text-white mb-4">타이핑 게임</h1>
-            <div className="flex space-x-2 mb-6">
-                {['easy', 'medium', 'hard'].map((level) => (
-                    <button
-                        key={level}
-                        onClick={() => setDifficulty(level)}
-                        className={`px-4 py-2 rounded-lg font-medium transition ${
-                            difficulty === level
-                                ? 'bg-primary-light text-white shadow-lg'
-                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
-                    >
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                    </button>
-                ))}
-            </div>
-            <p className="text-2xl text-gray-300 mb-8">점수: {score}</p>
             <p className="text-5xl font-bold text-primary-light mb-4 tracking-widest">{currentWordObj.korean}</p>
             <div className="flex justify-center items-center mb-6 h-8">
                 {isHintModeOn && currentWordObj.english && (
