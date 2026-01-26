@@ -9,6 +9,7 @@ const SpacingGame = ({ onBack }) => {
     const [feedback, setFeedback] = useState(null); // 'correct', 'wrong', or null
     const [gameOver, setGameOver] = useState(false);
     const [spacings, setSpacings] = useState([]);
+    const [lastUserAnswer, setLastUserAnswer] = useState(''); // New state to store the last submitted answer
 
     useEffect(() => {
         fetch('/words/korean_spacing_easy.json')
@@ -32,6 +33,17 @@ const SpacingGame = ({ onBack }) => {
         setGameOver(false);
         if (shuffled.length > 0) {
             setSpacings(new Array(shuffled[0].question.length - 1).fill(false));
+        }
+    };
+
+    const handleNextQuestion = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            const nextIndex = currentQuestionIndex + 1;
+            setCurrentQuestionIndex(nextIndex);
+            setSpacings(new Array(questions[nextIndex].question.length - 1).fill(false));
+            setFeedback(null);
+        } else {
+            setGameOver(true);
         }
     };
 
@@ -61,20 +73,22 @@ const SpacingGame = ({ onBack }) => {
         if (userAnswer === correctAnswer) {
             setScore(prev => prev + 1);
             setFeedback('correct');
+            setTimeout(() => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    const nextIndex = currentQuestionIndex + 1;
+                    setCurrentQuestionIndex(nextIndex);
+                    setSpacings(new Array(questions[nextIndex].question.length - 1).fill(false));
+                    setFeedback(null);
+                    setLastUserAnswer(''); // Clear last user answer on correct progression
+                } else {
+                    setGameOver(true);
+                }
+            }, 2000);
         } else {
             setFeedback('wrong');
+            setLastUserAnswer(userAnswer); // Store the user's incorrect answer
+            // Do not automatically advance for wrong answers. A button will handle this.
         }
-
-        setTimeout(() => {
-            if (currentQuestionIndex < questions.length - 1) {
-                const nextIndex = currentQuestionIndex + 1;
-                setCurrentQuestionIndex(nextIndex);
-                setSpacings(new Array(questions[nextIndex].question.length - 1).fill(false));
-                setFeedback(null);
-            } else {
-                setGameOver(true);
-            }
-        }, 2000);
     };
 
     const toggleSpace = (index) => {
@@ -103,16 +117,21 @@ const SpacingGame = ({ onBack }) => {
             content = <CheckCircle size={80} className="text-white animate-pulse" />;
         } else {
             content = (
-                <div className="text-center">
+                <div className="flex flex-col items-center justify-center text-center p-4"> {/* Added p-4 for padding around content */}
                     <XCircle size={80} className="text-white animate-pulse" />
-                    <p className="text-white text-xl sm:text-2xl font-bold mt-4">정답:</p>
+                    <p className="text-white text-xl sm:text-2xl font-bold mt-4">내가 제출한 답:</p>
+                    <p className="text-white text-lg sm:text-xl mb-2">{lastUserAnswer}</p>
+                    <p className="text-white text-xl sm:text-2xl font-bold">정답:</p>
                     <p className="text-white text-lg sm:text-xl font-bold">{currentQuestion.answer}</p>
+                    <Button onClick={handleNextQuestion} variant="threedee" color="secondary" className="mt-4 z-50"> {/* Added z-50 */}
+                        다음 문제
+                    </Button>
                 </div>
             );
         }
         
         const bgColor = feedback === 'correct' ? 'bg-green-500/80' : 'bg-red-500/80';
-        return <div className={`absolute inset-0 ${bgColor} flex items-center justify-center rounded-2xl`}>{content}</div>;
+        return <div className={`absolute inset-0 ${bgColor} rounded-2xl flex items-center justify-center`}>{content}</div>; // Keep flex for centering the whole content block, but let content define height
     }
 
     const renderInteractiveQuestion = () => {
