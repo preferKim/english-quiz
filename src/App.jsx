@@ -6,6 +6,7 @@ import RankingScreen from './screens/RankingScreen';
 import ConnectingGameScreen from './screens/ConnectingGameScreen';
 import SubjectScreen from './screens/SubjectScreen';
 import KoreanSelectionScreen from './screens/KoreanSelectionScreen';
+import LiteraryTermsScreen from './screens/LiteraryTermsScreen';
 import MathSelectionScreen from './screens/MathSelectionScreen';
 import MathGameScreen from './screens/MathGameScreen';
 import ClickerGame from './screens/playground/ClickerGame';
@@ -778,6 +779,8 @@ const defaultWords = [
     const handleNavigate = (screen) => {
         if (screen === 'tamagotchi') {
             dispatch({ type: 'GO_TO_TAMAGOTCHI' });
+        } else if (screen === 'literary_terms') {
+            setScreen('literary_terms');
         }
     };
 
@@ -853,6 +856,10 @@ const defaultWords = [
                 onSelectGame={(gameType) => setScreen(`korean-${gameType}-game`)}
                 onBackToSubjects={() => setScreen('subjects')}
             />;
+        }
+
+        if (screen === 'literary_terms') {
+            return <LiteraryTermsScreen onBackToSelection={() => setScreen('korean-selection')} />;
         }
 
         if (screen === 'korean-spelling-game') {

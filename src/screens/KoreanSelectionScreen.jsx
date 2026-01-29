@@ -78,12 +78,12 @@ const KoreanSelectionScreen = ({ user, onNavigate, onSelectGame, onBackToSubject
                 </p>
                 <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-10">
                     <Button
-                        onClick={() => handleComingSoon('문학 개념어')}
+                        onClick={() => onNavigate('literary_terms')}
                         variant="threedee"
-                        color="gray"
-                        className="w-full h-32 text-2xl"
+                        color="normal"
+                        className="w-full h-32 text-xl flex flex-col justify-center items-center"
                     >
-                        📚<br/>문학 개념어<br/><span className="text-sm">(준비중)</span>
+                        📚 문학 개념어
                     </Button>
                     <Button
                         onClick={() => handleComingSoon('비문학 요약 훈련')}
