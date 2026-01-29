@@ -86,6 +86,14 @@ const KoreanSelectionScreen = ({ user, onNavigate, onSelectGame, onBackToSubject
                         📚 문학 개념어
                     </Button>
                     <Button
+                        onClick={() => onNavigate('korean_grammar')}
+                        variant="threedee"
+                        color="warning"
+                        className="w-full h-32 text-lg flex flex-col justify-center items-center"
+                    >
+                        ⚖️ 문법기본(품사)
+                    </Button>
+                    <Button
                         onClick={() => handleComingSoon('비문학 요약 훈련')}
                         variant="threedee"
                         color="gray"
