@@ -18,6 +18,7 @@ import PuzzleGame from './components/games/PuzzleGame';
 import SpellingGame from './components/games/SpellingGame';
 import SpacingGame from './components/games/SpacingGame';
 import ChosungGame from './components/games/ChosungGame';
+import ChosungResultScreen from './screens/ChosungResultScreen';
 import GrammarQuiz from './components/games/GrammarQuiz';
 import { usePlayer } from './context/PlayerContext';
 import LevelUpNotification from './components/LevelUpNotification';
@@ -222,6 +223,7 @@ const defaultWords = [
     const [screen, setScreen] = useState('subjects'); // 'subjects', 'modes', 'math-selection'
     const [mathDifficulty, setMathDifficulty] = useState('easy');
     const [selectedTopicLevel, setSelectedTopicLevel] = useState(1);
+    const [chosungScore, setChosungScore] = useState(0);
     const appRef = useRef(null);
     const [mathGameKey, setMathGameKey] = useState(0);
 
@@ -896,9 +898,17 @@ const defaultWords = [
         if (screen === 'korean-chosung-game') {
             return <ChosungGame 
                 onGameEnd={(finalScore) => {
-                    alert(`게임 종료! 최종 점수: ${finalScore}`);
-                    setScreen('korean-selection');
+                    setChosungScore(finalScore);
+                    setScreen('korean-chosung-result');
                 }}
+                onBack={() => setScreen('korean-selection')}
+            />;
+        }
+
+        if (screen === 'korean-chosung-result') {
+            return <ChosungResultScreen
+                score={chosungScore}
+                onRestart={() => setScreen('korean-chosung-game')}
                 onBack={() => setScreen('korean-selection')}
             />;
         }
@@ -1008,7 +1018,7 @@ const defaultWords = [
 
     return (
         <div ref={appRef} className="w-full min-h-screen items-center justify-center overflow-x-hidden">
-            <div className="max-w-2xl w-full">
+            <div className="max-w-2xl w-full h-full">
                 {renderContent()}
             </div>
             <LevelUpNotification />
