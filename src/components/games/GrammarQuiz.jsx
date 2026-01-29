@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Lightbulb, BookOpen } from 'lucide-react';
 import Button from '../Button';
 
 const GrammarQuiz = ({ onBack }) => {
@@ -94,7 +94,7 @@ const GrammarQuiz = ({ onBack }) => {
     }
 
     return (
-        <div className="glass-card p-6 sm:p-8 text-white relative">
+        <div className="glass-card p-4 sm:p-8 text-center relative flex flex-col items-center max-w-2xl mx-auto">
             <div className="w-full flex justify-between items-center mb-4">
                 <div className="w-1/4">
                     <button
@@ -142,33 +142,24 @@ const GrammarQuiz = ({ onBack }) => {
                     </p>
                 </div>
 
-                <div className="h-36 flex items-center justify-center">
+                <div className="flex items-center justify-center">
                     {feedback === null ? (
                         <Button
                             onClick={checkAnswer}
                             variant="threedee"
                             color="primary"
-                            disabled={selectedWords.length === 0}
                         >
                             정답 확인
                         </Button>
                     ) : (
-                        <div className="text-center w-full">
-                            <p className={`text-xl font-bold mb-2 ${feedback === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                                {feedback === 'correct' ? '정답입니다!' : '오답입니다.'}
-                            </p>
-                            
+                        <div className="w-full animate-fade-in">
                             {currentQuestion.explain && (
-                                <div className="bg-black/20 p-3 rounded-lg text-left mb-4 max-w-md mx-auto">
-                                    <h4 className="font-bold text-sm text-yellow-300 flex items-center mb-1">
-                                        <Lightbulb size={14} className="mr-1.5" />
-                                        해설
-                                    </h4>
+                                <div className="bg-black/20 p-4 rounded-xl mb-4 text-left border border-white/10">
+                                    <h3 className="font-bold text-lg text-blue-300 flex items-center mb-2"><BookOpen size={18} className="mr-2"/>해설</h3>
                                     <p className="text-sm text-gray-200">{currentQuestion.explain}</p>
                                 </div>
                             )}
-                            
-                            <Button onClick={nextQuestion} variant="threedee" color="secondary">
+                            <Button onClick={nextQuestion} variant="threedee" color="primary" className="w-full mt-4">
                                 {currentQuestionIndex < questions.length - 1 ? '다음 문제' : '결과 보기'}
                             </Button>
                         </div>

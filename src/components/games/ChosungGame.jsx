@@ -139,34 +139,33 @@ const ChosungGame = ({ onGameEnd, onBack }) => {
                     {showHint && (
                         <p className="text-lg text-primary-light mt-2">힌트: {currentQuestion.hint}</p>
                     )}
-                </div>
-            </div>
 
-            {/* Input and Feedback Area (fixed at bottom of flex container) */}
-            <div className="p-4 bg-gray-900/80 sticky bottom-0 z-10"> {/* Added sticky footer for input/feedback */}
-                <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-                    <input
-                        type="text"
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        className="text-2xl text-center bg-transparent border-2 border-white/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary-light w-4/5" // Changed flex-grow to w-4/5
-                        ref={inputRef}
-                        disabled={feedback.startsWith('정답') || feedback.startsWith('시간 초과')}
-                    />
-                    <Button 
-                        type="submit" 
-                        variant="threedee" 
-                        color="primary"
-                        className="flex-shrink-0"
-                        disabled={feedback.startsWith('정답') || feedback.startsWith('시간 초과')}
-                    >
-                        제출
-                    </Button>
-                </form>
-                
-                {feedback && <p className={`mt-4 text-xl font-bold ${feedback.includes('정답') ? 'text-green-400' : 'text-red-400'}`}>{feedback}</p>}
-            </div>
-        </div>
+                    {/* Input and Feedback Area moved here */}
+                    <div className="mt-6"> {/* Added margin top for spacing */}
+                        <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+                            <input
+                                type="text"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                className="text-2xl text-center bg-transparent border-2 border-white/50 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary-light w-4/5"
+                                ref={inputRef}
+                                disabled={feedback.startsWith('정답') || feedback.startsWith('시간 초과')}
+                            />
+                            <Button 
+                                type="submit" 
+                                variant="threedee" 
+                                color="primary"
+                                className="flex-shrink-0"
+                                disabled={feedback.startsWith('정답') || feedback.startsWith('시간 초과')}
+                            >
+                                제출
+                            </Button>
+                        </form>
+                        
+                        {feedback && <p className={`mt-4 text-xl font-bold ${feedback.includes('정답') ? 'text-green-400' : 'text-red-400'}`}>{feedback}</p>}
+                    </div>
+                </div>
+            </div>        </div>
     );
 };
 
