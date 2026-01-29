@@ -136,7 +136,7 @@ const GrammarQuiz = ({ onBack }) => {
                 <h2 className="text-2xl font-bold mb-6">{currentQuestion.question}</h2>
 
                 <div className="bg-black/30 p-6 rounded-lg mb-6 min-h-[100px] flex items-center">
-                    <p className="text-2xl tracking-wider text-left">
+                    <p className="text-2xl tracking-wider text-center">
                         {currentQuestion.words.map((word, index) => (
                             <span
                                 key={index}
