@@ -11,11 +11,24 @@ const SpellingGame = ({ onBack }) => {
     const [gameOver, setGameOver] = useState(false);
     const explanationRef = useRef(null);
 
+    // Fisher-Yates shuffle algorithm
+    const shuffleArray = (array) => {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    };
+
     useEffect(() => {
         fetch('/words/korean_spelling_easy.json')
             .then(res => res.json())
             .then(data => {
-                setQuestions(data.filter(q => q.question)); // 데이터 유효성 검사
+                const filteredData = data.filter(q => q.question);
+                setQuestions(shuffleArray(filteredData)); // 데이터 유효성 검사 및 셔플
             })
             .catch(err => console.error("Failed to load spelling questions:", err));
     }, []);
@@ -27,7 +40,7 @@ const SpellingGame = ({ onBack }) => {
     }, [feedback]);
 
     const startNewGame = () => {
-        setQuestions(questions.sort(() => Math.random() - 0.5));
+        setQuestions(shuffleArray([...questions])); // Re-shuffle
         setCurrentQuestionIndex(0);
         setScore(0);
         setSelectedAnswer(null);
