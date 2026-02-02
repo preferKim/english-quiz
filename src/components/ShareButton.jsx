@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Share2 } from 'lucide-react'; // Import the Share2 icon
 
 const ShareButton = () => {
   const location = useLocation();
@@ -33,20 +34,12 @@ const ShareButton = () => {
   };
 
   return (
-    <button onClick={handleShare} style={{
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      zIndex: 1000,
-      padding: '10px 15px',
-      backgroundColor: '#007bff',
-      color: 'white',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      fontSize: '16px'
-    }}>
-      공유하기
+    <button
+      onClick={handleShare}
+      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+      aria-label="공유하기"
+    >
+      <Share2 size={24} />
     </button>
   );
 };
