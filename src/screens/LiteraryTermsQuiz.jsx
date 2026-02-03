@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 import Button from '../components/Button';
 
 const LiteraryTermsQuiz = () => {
@@ -10,7 +10,6 @@ const LiteraryTermsQuiz = () => {
     const [quizQuestions, setQuizQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
-    const [lives, setLives] = useState(3);
     const [userAnswer, setUserAnswer] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [feedbackText, setFeedbackText] = useState('');
@@ -31,7 +30,7 @@ const LiteraryTermsQuiz = () => {
                 .map(t => t.term);
 
             const options = [...distractors, correctTerm.term].sort(() => 0.5 - Math.random());
-            
+
             let questionText = '';
             if (questionType === 'definition' || !correctTerm.examples || correctTerm.examples.length === 0) {
                 questionText = correctTerm.description;
@@ -48,7 +47,7 @@ const LiteraryTermsQuiz = () => {
         });
         setQuizQuestions(generated);
     }, []);
-    
+
     useEffect(() => {
         fetch('/words/korean_literary_terms.json')
             .then(res => res.json())
@@ -73,14 +72,13 @@ const LiteraryTermsQuiz = () => {
         setIsAnswered(true);
 
         const correctTermAnswer = quizQuestions[currentQuestionIndex].answer;
-        const correctTermDetails = allTerms.find(t => t.term === correctTermAnswer); // Moved outside conditional
-        setExplanationTerm(correctTermDetails); // Always set explanation term
+        const correctTermDetails = allTerms.find(t => t.term === correctTermAnswer);
+        setExplanationTerm(correctTermDetails);
 
         if (option === correctTermAnswer) {
             setScore(prev => prev + 10);
             setFeedbackText('정답입니다! 🎉');
         } else {
-            setLives(prev => prev - 1);
             setFeedbackText('오답입니다 😥');
         }
     };
@@ -97,7 +95,6 @@ const LiteraryTermsQuiz = () => {
         generateQuestions(allTerms);
         setCurrentQuestionIndex(0);
         setScore(0);
-        setLives(3);
         setUserAnswer(null);
         setIsAnswered(false);
         setFeedbackText('');
@@ -108,7 +105,7 @@ const LiteraryTermsQuiz = () => {
         return <div className="glass-card p-6 text-center text-white text-xl">퀴즈를 생성하는 중...</div>;
     }
 
-    const isGameOver = currentQuestionIndex >= quizQuestions.length || lives <= 0;
+    const isGameOver = currentQuestionIndex >= quizQuestions.length;
 
     if (isGameOver) {
         return (
@@ -131,19 +128,15 @@ const LiteraryTermsQuiz = () => {
         <div className="glass-card p-4 sm:p-8 text-center relative flex flex-col items-center max-w-2xl mx-auto">
             {/* Header */}
             <div className="w-full flex justify-between items-center mb-4">
-                <div className="w-1/4 text-left">
+                <div className="w-1/3 text-left">
                     <button onClick={() => navigate(-1)} className="text-gray-200 hover:text-white transition p-2" title="뒤로가기">
                         <ArrowLeft size={24} />
                     </button>
                 </div>
-                <div className="w-1/2 flex items-center justify-center gap-4">
-                    <div className="flex items-center gap-1">
-                        {[...Array(3)].map((_, i) => (
-                            <Heart key={i} size={24} className={i < lives ? 'text-red-500 fill-current transition-all' : 'text-gray-600 transition-all'} />
-                        ))}
-                    </div>
+                <div className="w-1/3 text-center">
+                    <p className="text-2xl text-white font-bold">문학 개념어 퀴즈</p>
                 </div>
-                <div className="w-1/4 text-right">
+                <div className="w-1/3 text-right">
                     <p className="text-xl text-primary-light font-semibold">점수: {score}</p>
                 </div>
             </div>
@@ -192,7 +185,7 @@ const LiteraryTermsQuiz = () => {
                     <p className={`text-2xl font-bold mb-4 ${feedbackText.includes('정답') ? 'text-green-400' : 'text-red-400'}`}>
                         {feedbackText}
                     </p>
-                    
+
                     {explanationTerm && (
                         <div className="glass-card p-6 rounded-lg mb-6 w-full text-left animate-card-appear">
                             <h4 className="text-xl font-semibold text-white mb-3 flex items-center">
@@ -200,7 +193,7 @@ const LiteraryTermsQuiz = () => {
                             </h4>
                             <h3 className="text-2xl font-bold text-primary-light mb-4">{explanationTerm.term}</h3>
                             <p className="text-lg text-gray-200 mb-6 leading-relaxed">{explanationTerm.description}</p>
-                            
+
                             {explanationTerm.examples && explanationTerm.examples.length > 0 && (
                                 <div className="border-t border-white/20 pt-4 mt-4">
                                     <h4 className="text-lg font-semibold text-white mb-3">예시</h4>
@@ -214,7 +207,7 @@ const LiteraryTermsQuiz = () => {
                             )}
                         </div>
                     )}
-                    
+
                     <Button
                         ref={nextButtonRef} // Attach ref to the button
                         onClick={handleNextQuestion}

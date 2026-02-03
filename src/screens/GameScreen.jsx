@@ -6,6 +6,7 @@ import PlayerStats from '../components/PlayerStats';
 import PauseMenu from '../components/PauseMenu';
 import RankingScreen from './RankingScreen';
 import ConnectingGameScreen from './ConnectingGameScreen';
+import FeedbackAnimation from '../components/FeedbackAnimation';
 import { supabase } from '../supabaseClient';
 
 const initialState = {
@@ -72,7 +73,7 @@ function reducer(state, action) {
 const GameScreen = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { addXp } = usePlayer();
+    const { addXp, addWeakWord } = usePlayer();
     const [user, setUser] = useState(null);
     const { name, level, mode } = location.state || { name: 'Player', level: 'easy', mode: 'normal' };
 
@@ -109,7 +110,7 @@ const GameScreen = () => {
             loadGameData();
         }
     }, [status, difficulty, gameMode]);
-    
+
     useEffect(() => {
         if (status !== 'playing' || isPaused) {
             clearInterval(timerRef.current);
@@ -134,8 +135,31 @@ const GameScreen = () => {
         }
     }, [status, currentIndex, words]);
 
+    // Keyboard navigation
+    useEffect(() => {
+        if (status !== 'playing' || isPaused || feedback || gameMode === 'connect') return;
+
+        const handleKeyPress = (e) => {
+            // Prevent default behavior for arrow keys
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            if (e.key === 'ArrowUp') checkAnswer('up');
+            else if (e.key === 'ArrowDown') checkAnswer('down');
+            else if (e.key === 'ArrowLeft') checkAnswer('left');
+            else if (e.key === 'ArrowRight') checkAnswer('right');
+            else if (e.key === ' ' && words[currentIndex]) {
+                speakWord(words[currentIndex].english, 1);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [status, isPaused, feedback, gameMode, currentIndex, words]);
+
     const speakWord = (word, repeatCount = 1, onComplete) => {
-        if (!('speechSynthesis' in window)) { if(onComplete) onComplete(); return; }
+        if (!('speechSynthesis' in window)) { if (onComplete) onComplete(); return; }
         window.speechSynthesis.cancel();
         dispatch({ type: 'SPEAKING_START' });
         let spoken = 0;
@@ -161,6 +185,10 @@ const GameScreen = () => {
     const handleNext = () => dispatch({ type: 'NEXT_WORD' });
     const handleTimeout = () => {
         dispatch({ type: 'TIMEOUT' });
+        // Track weak word on timeout
+        if (words[currentIndex]) {
+            addWeakWord(words[currentIndex]);
+        }
         setTimeout(() => speakWord(words[currentIndex]?.english, 1, handleNext), 500);
     };
 
@@ -169,7 +197,16 @@ const GameScreen = () => {
         const selectedAnswer = options[directionMap[direction]];
         const isCorrect = selectedAnswer === words[currentIndex].korean;
         dispatch({ type: 'CHECK_ANSWER', payload: { isCorrect } });
-        if (isCorrect) addXp(difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3);
+
+        if (isCorrect) {
+            addXp(difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3);
+        } else {
+            // Track weak word on wrong answer
+            if (words[currentIndex]) {
+                addWeakWord(words[currentIndex]);
+            }
+        }
+
         setTimeout(handleNext, 1200);
     };
 
@@ -195,14 +232,14 @@ const GameScreen = () => {
         const dx = dragPosRef.current.x - dragStart.x, dy = dragPosRef.current.y - dragStart.y;
         const threshold = 50;
         let dir = null;
-        if (Math.abs(dx) > Math.abs(dy)) { if (Math.abs(dx) > threshold) dir = dx > 0 ? 'right' : 'left'; } 
+        if (Math.abs(dx) > Math.abs(dy)) { if (Math.abs(dx) > threshold) dir = dx > 0 ? 'right' : 'left'; }
         else { if (Math.abs(dy) > threshold) dir = dy > 0 ? 'down' : 'up'; }
         if (dir) checkAnswer(dir);
         setIsDragging(false);
         setDragStart(null);
         if (cardRef.current) { cardRef.current.style.transform = ''; cardRef.current.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; }
     };
-    
+
     const getTimerColor = () => {
         const time = gameMode === 'speed' ? speedRunTimeLeft : timeLeft;
         if (gameMode === 'speed') { if (time > 30) return 'text-success-dark'; if (time > 10) return 'text-speed-dark'; return 'text-danger-dark'; }
@@ -213,9 +250,9 @@ const GameScreen = () => {
     const handleRestart = () => dispatch({ type: 'START_GAME', payload: { name, level, mode } });
 
     if (status === 'loading' || (words.length === 0 && gameMode !== 'connect')) return <div className="flex items-center justify-center h-screen text-xl font-bold text-white">Loading...</div>;
-    if (status === 'finished') return <RankingScreen onRestart={handleRestart} gameMode={gameMode} score={score} wrongAnswers={wrongAnswers} total={total} lives={lives} time={gameMode === 'connect' ? connectTime : speedRunTimeLeft} />; 
-    if (gameMode === 'connect') return <ConnectingGameScreen words={connectWords} lives={lives} onCheckAnswer={(w1, w2) => dispatch({ type: 'CHECK_CONNECT_ANSWER', payload: { word1: w1, word2: w2 } })} matchedPairs={matchedPairs} resetGame={togglePause} time={connectTime} />; 
-    
+    if (status === 'finished') return <RankingScreen onRestart={handleRestart} gameMode={gameMode} score={score} wrongAnswers={wrongAnswers} total={total} lives={lives} time={gameMode === 'connect' ? connectTime : speedRunTimeLeft} />;
+    if (gameMode === 'connect') return <ConnectingGameScreen words={connectWords} lives={lives} onCheckAnswer={(w1, w2) => dispatch({ type: 'CHECK_CONNECT_ANSWER', payload: { word1: w1, word2: w2 } })} matchedPairs={matchedPairs} resetGame={togglePause} time={connectTime} />;
+
     const currentWord = words[currentIndex] || {};
     const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
     const finalScore = score - (wrongAnswers * 5);
@@ -225,10 +262,10 @@ const GameScreen = () => {
             {isPaused && <PauseMenu onResume={togglePause} onRestart={handleRestart} onExit={() => navigate('/english')} />}
             <PlayerStats />
             <div className="glass-card px-8 pt-8 pb-4 text-center relative">
-                <button onClick={togglePause} className="absolute left-4 top-4 text-gray-300 hover:text-white transition p-2" title="일시정지"><ArrowLeft size={24} /></button>
+                <button onClick={togglePause} className="absolute left-4 top-4 text-gray-300 hover:text-white transition p-2" title="일시정지" aria-label="일시정지"><ArrowLeft size={24} /></button>
                 <div className="flex items-center justify-center gap-3 mb-1">
                     <div className="text-5xl font-bold text-white">{currentWord.english}</div>
-                    {gameMode !== 'speed' && <button onClick={() => speakWord(currentWord.english, 1)} className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"><Volume2 size={28} className="text-primary-light" /></button>}
+                    {gameMode !== 'speed' && <button onClick={() => speakWord(currentWord.english, 1)} className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition" aria-label="발음 듣기 (Space 키)"><Volume2 size={28} className="text-primary-light" /></button>}
                 </div>
                 {currentWord.pronunciation && <div className="text-2xl text-primary-light font-mono tracking-wider mb-2">{currentWord.pronunciation}</div>}
                 <div className="flex items-center justify-between gap-4 mb-6 px-2">
@@ -242,16 +279,25 @@ const GameScreen = () => {
                 <div className="text-gray-300 text-sm">총 문제 : {total}, 정답률 : {accuracy}%{gameMode === 'speed' && ` / 최종점수 : ${finalScore}`}</div>
             </div>
             <div className="relative h-[330px] glass-card px-4 py-8">
-                 {['up', 'down', 'left', 'right'].map((dir, i) => <div key={dir} className={`absolute ${dir === 'up' || dir === 'down' ? 'left-1/2 -translate-x-1/2' : 'top-1/2 -translate-y-1/2'} ${dir === 'up' ? 'top-6' : dir === 'down' ? 'bottom-6' : dir === 'left' ? 'left-2' : 'right-2'}`}><div className="glass-card bg-primary/10 border text-white rounded-2xl px-8 py-3 min-w-[120px] text-center"><div className="text-lg font-bold tracking-tight">{options[i]}</div></div></div>)}
+                {['up', 'down', 'left', 'right'].map((dir, i) => <div key={dir} className={`absolute ${dir === 'up' || dir === 'down' ? 'left-1/2 -translate-x-1/2' : 'top-1/2 -translate-y-1/2'} ${dir === 'up' ? 'top-6' : dir === 'down' ? 'bottom-6' : dir === 'left' ? 'left-2' : 'right-2'}`}><div className="glass-card bg-primary/10 border text-white rounded-2xl px-8 py-3 min-w-[120px] text-center"><div className="text-lg font-bold tracking-tight">{options[i]}</div></div></div>)}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gray-900/50 rounded-full shadow-inner border-2 border-white/10"></div>
-                    <div ref={cardRef} className="relative w-20 h-20 cursor-grab active:cursor-grabbing select-none" style={{ touchAction: 'none' }} onMouseDown={handleDragStart} onMouseMove={handleDragMove} onMouseUp={handleDragEnd} onMouseLeave={handleDragEnd} onTouchStart={handleDragStart} onTouchMove={handleDragMove} onTouchEnd={handleDragEnd}> 
+                    <div ref={cardRef} className="relative w-20 h-20 cursor-grab active:cursor-grabbing select-none" style={{ touchAction: 'none' }} onMouseDown={handleDragStart} onMouseMove={handleDragMove} onMouseUp={handleDragEnd} onMouseLeave={handleDragEnd} onTouchStart={handleDragStart} onTouchMove={handleDragMove} onTouchEnd={handleDragEnd}>
                         <div className="absolute inset-0 flex items-center justify-center">{/* SVG Joystick */}</div>
                         {isDragging && <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl -z-10 animate-pulse"></div>}
                     </div>
                 </div>
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/60 z-20 rounded-2xl transition-all duration-300 ease-in-out ${feedback ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    {/* Feedback overlay content here */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-20 rounded-2xl transition-all duration-300 ease-in-out ${feedback ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                    {feedback && (
+                        <FeedbackAnimation
+                            type={feedback}
+                            answer={options[['up', 'down', 'left', 'right'].findIndex(dir => {
+                                const directionMap = { up: 0, down: 1, left: 2, right: 3 };
+                                return options[directionMap[dir]] === (feedback === 'correct' ? currentWord.korean : null);
+                            })]}
+                            correctAnswer={currentWord.korean}
+                        />
+                    )}
                 </div>
             </div>
         </div>

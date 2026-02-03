@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Gamepad2, Target, Keyboard, Hash, Puzzle } from 'lucide-react';
+import { BookOpen, Gamepad2, Target, Keyboard, Hash, Puzzle, BarChart3 } from 'lucide-react';
 import Button from '../components/Button';
 import HeaderSection from '../components/HeaderSection';
+import OnboardingModal from '../components/OnboardingModal';
 
 const SubjectScreen = ({ onSignUp, onLogin, onLogout, user }) => {
     const navigate = useNavigate();
+    const [showOnboarding, setShowOnboarding] = useState(false);
+
+    useEffect(() => {
+        const hasSeenTutorial = localStorage.getItem('hasSeenTutorial');
+        if (!hasSeenTutorial) {
+            setShowOnboarding(true);
+        }
+    }, []);
 
     const handleSubjectClick = (subject) => {
         if (subject.startsWith('playground-')) {
@@ -19,63 +28,77 @@ const SubjectScreen = ({ onSignUp, onLogin, onLogout, user }) => {
     };
 
     return (
-        <div className="glass-card p-6 sm:p-8 text-center relative max-w-4xl mx-auto">
-            <HeaderSection
-                onSignUp={onSignUp}
-                onLogin={onLogin}
-                onLogout={onLogout}
-                user={user}
-            />
+        <>
+            {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
+            <div className="glass-card p-6 sm:p-8 text-center relative max-w-4xl mx-auto">
+                <HeaderSection
+                    onSignUp={onSignUp}
+                    onLogin={onLogin}
+                    onLogout={onLogout}
+                    user={user}
+                />
 
-            <div className="space-y-5">
-                {/* 공부방 Section */}
-                <div className="bg-black/10 rounded-2xl p-6">
-                    <div className="flex items-center justify-center mb-5">
-                        <BookOpen className="text-blue-300 mr-3" size={28} />
-                        <h2 className="text-2xl font-bold text-white">공부방</h2>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-                        <Button onClick={() => handleSubjectClick('korean')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">📖</span><br/>국어
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('english')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">🔤</span><br/>영어
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('math')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">➕</span><br/>수학
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('social')} variant="threedee" color="success" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">🏛️</span><br/>사회
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('science')} variant="threedee" color="speed" className="w-full h-28 flex flex-col items-center justify-center">
-                            <span className="text-2xl">🔬</span><br/>과학
-                        </Button>
-                    </div>
-                </div>
+                <div className="space-y-5">
+                    {/* Dashboard Button */}
+                    <Button
+                        onClick={() => navigate('/dashboard')}
+                        variant="threedee"
+                        color="success"
+                        className="w-full h-16 flex items-center justify-center gap-3"
+                    >
+                        <BarChart3 size={24} className="text-white" />
+                        <span className="text-lg font-bold">학습 대시보드</span>
+                    </Button>
 
-                {/* 놀이터 Section */}
-                <div className="bg-black/10 rounded-2xl p-6">
-                    <div className="flex items-center justify-center mb-5">
-                        <Gamepad2 className="text-green-300 mr-3" size={28} />
-                        <h2 className="text-2xl font-bold text-white">놀이터</h2>
+                    {/* 공부방 Section */}
+                    <div className="bg-black/10 rounded-2xl p-6">
+                        <div className="flex items-center justify-center mb-5">
+                            <BookOpen className="text-blue-300 mr-3" size={28} />
+                            <h2 className="text-2xl font-bold text-white">공부방</h2>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+                            <Button onClick={() => handleSubjectClick('korean')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center">
+                                <span className="text-2xl">📖</span><br />국어
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('english')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
+                                <span className="text-2xl">🔤</span><br />영어
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('math')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center">
+                                <span className="text-2xl">➕</span><br />수학
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('social')} variant="threedee" color="success" className="w-full h-28 flex flex-col items-center justify-center">
+                                <span className="text-2xl">🏛️</span><br />사회
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('science')} variant="threedee" color="speed" className="w-full h-28 flex flex-col items-center justify-center">
+                                <span className="text-2xl">🔬</span><br />과학
+                            </Button>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-                        <Button onClick={() => handleSubjectClick('playground-clicker')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <Target size={28} className="text-white mb-1" /><br/>클릭<br/>게임
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('playground-typing')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
-                            <Keyboard size={28} className="text-white mb-1" /><br/>타이핑<br/>게임
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('playground-guessing')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center">
-                            <Hash size={28} className="text-white mb-1" /><br/>맞추기<br/>게임
-                        </Button>
-                        <Button onClick={() => handleSubjectClick('playground-puzzle')} variant="threedee" color="warning" className="w-full h-28 flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-orange-500">
-                            <Puzzle size={28} className="text-white mb-1" /><br/>퍼즐<br/>게임
-                        </Button>
+
+                    {/* 놀이터 Section */}
+                    <div className="bg-black/10 rounded-2xl p-6">
+                        <div className="flex items-center justify-center mb-5">
+                            <Gamepad2 className="text-green-300 mr-3" size={28} />
+                            <h2 className="text-2xl font-bold text-white">놀이터</h2>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+                            <Button onClick={() => handleSubjectClick('playground-clicker')} variant="threedee" color="secondary" className="w-full h-28 flex flex-col items-center justify-center">
+                                <Target size={28} className="text-white mb-1" /><br />클릭<br />게임
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('playground-typing')} variant="threedee" color="primary" className="w-full h-28 flex flex-col items-center justify-center">
+                                <Keyboard size={28} className="text-white mb-1" /><br />타이핑<br />게임
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('playground-guessing')} variant="threedee" color="danger" className="w-full h-28 flex flex-col items-center justify-center">
+                                <Hash size={28} className="text-white mb-1" /><br />맞추기<br />게임
+                            </Button>
+                            <Button onClick={() => handleSubjectClick('playground-puzzle')} variant="threedee" color="warning" className="w-full h-28 flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-orange-500">
+                                <Puzzle size={28} className="text-white mb-1" /><br />퍼즐<br />게임
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 export default SubjectScreen;

@@ -25,14 +25,18 @@ export const PlayerProvider = ({ children }) => { // Remove user prop
   const [xp, setXp] = useState(0);
   const [justLeveledUp, setJustLeveledUp] = useState(false);
   const [currentUser, setCurrentUser] = useState(null); // New state for internal user
+  const [weakWords, setWeakWords] = useState(() => {
+    const saved = localStorage.getItem('weakWords');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-        setCurrentUser(session?.user ?? null);
+      setCurrentUser(session?.user ?? null);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setCurrentUser(session?.user ?? null);
+      setCurrentUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -72,7 +76,7 @@ export const PlayerProvider = ({ children }) => { // Remove user prop
         const initialLevel = 1;
         setXp(initialXp);
         setLevel(initialLevel);
-        
+
         const { error: insertError } = await supabase
           .from('profiles')
           .update({ xp: initialXp, level: initialLevel }) // Use update to insert if no profile exists
@@ -96,27 +100,27 @@ export const PlayerProvider = ({ children }) => { // Remove user prop
     // Check for level up
     // LEVEL_THRESHOLDS[newLevel - 1] is the XP needed to complete the current newLevel
     while (newLevel <= LEVEL_THRESHOLDS.length && newXp >= LEVEL_THRESHOLDS[newLevel - 1]) {
-        if (LEVEL_THRESHOLDS[newLevel - 1] === Infinity) { // Max level reached
-            break;
-        }
-        newLevel++;
-        setJustLeveledUp(true);
+      if (LEVEL_THRESHOLDS[newLevel - 1] === Infinity) { // Max level reached
+        break;
+      }
+      newLevel++;
+      setJustLeveledUp(true);
     }
-    
+
     setXp(newXp);
     setLevel(newLevel);
 
     if (currentUser) {
-        const { error } = await supabase
-            .from('profiles')
-            .update({ xp: newXp, level: newLevel })
-            .eq('user_id', currentUser.id);
-        if (error) {
-            console.error('Error updating player stats in Supabase:', error);
-        }
+      const { error } = await supabase
+        .from('profiles')
+        .update({ xp: newXp, level: newLevel })
+        .eq('user_id', currentUser.id);
+      if (error) {
+        console.error('Error updating player stats in Supabase:', error);
+      }
     }
   };
-  
+
   const resetLevelUp = () => {
     setJustLeveledUp(false);
   }
@@ -129,14 +133,52 @@ export const PlayerProvider = ({ children }) => { // Remove user prop
     });
 
     if (currentUser) {
-        const { error } = await supabase
-            .from('profiles')
-            .update({ xp: xp - amount }) // Use current `xp` for Supabase update, as `setXp` is async
-            .eq('user_id', currentUser.id);
-        if (error) {
-            console.error('Error updating player XP in Supabase:', error);
-        }
+      const { error } = await supabase
+        .from('profiles')
+        .update({ xp: xp - amount }) // Use current `xp` for Supabase update, as `setXp` is async
+        .eq('user_id', currentUser.id);
+      if (error) {
+        console.error('Error updating player XP in Supabase:', error);
+      }
     }
+  };
+
+  const addWeakWord = (word) => {
+    setWeakWords(prev => {
+      const updated = { ...prev };
+      if (updated[word.english]) {
+        updated[word.english].count++;
+        updated[word.english].lastMissed = new Date().toISOString();
+      } else {
+        updated[word.english] = {
+          ...word,
+          count: 1,
+          lastMissed: new Date().toISOString(),
+        };
+      }
+      localStorage.setItem('weakWords', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeWeakWord = (english) => {
+    setWeakWords(prev => {
+      const updated = { ...prev };
+      delete updated[english];
+      localStorage.setItem('weakWords', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const getWeakWordsList = () => {
+    return Object.values(weakWords)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20); // Top 20 weak words
+  };
+
+  const clearWeakWords = () => {
+    setWeakWords({});
+    localStorage.removeItem('weakWords');
   };
 
   const value = {
@@ -150,6 +192,11 @@ export const PlayerProvider = ({ children }) => { // Remove user prop
     deductXp,
     justLeveledUp,
     resetLevelUp,
+    weakWords,
+    addWeakWord,
+    removeWeakWord,
+    getWeakWordsList,
+    clearWeakWords,
   };
 
   return (

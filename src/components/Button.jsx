@@ -11,11 +11,11 @@ const Button = ({
     className = '',
     ...props
 }) => {
-    const baseClasses = 'font-bold transition';
+    const baseClasses = 'font-bold transition-all duration-300 ease-out relative overflow-hidden group';
 
     const variantStyles = {
-        threedee: 'px-2 py-4 text-sm rounded-2xl active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed',
-        mode: 'px-6 py-3 rounded-xl',
+        threedee: 'px-2 py-4 text-sm rounded-2xl active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 hover:shadow-2xl',
+        mode: 'px-6 py-3 rounded-xl hover:scale-105',
     };
 
     const colorStyles = {
@@ -55,7 +55,9 @@ const Button = ({
             className={`${baseClasses} ${selectedVariantClass} ${selectedColorClass} ${className}`}
             {...props}
         >
-            {children}
+            {/* Shine effect */}
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+            <span className="relative z-10">{children}</span>
         </button>
     );
 };

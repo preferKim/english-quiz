@@ -22,6 +22,7 @@ import SpacingGame from './components/games/SpacingGame';
 import ChosungGame from './components/games/ChosungGame';
 import ChosungResultScreen from './screens/ChosungResultScreen';
 import MathGameScreen from './screens/MathGameScreen';
+import DashboardScreen from './screens/DashboardScreen';
 
 // Playground components
 import ClickerGame from './screens/playground/ClickerGame';
@@ -67,10 +68,11 @@ function App() {
           <Route path="/korean/spacing" element={<SpacingGame />} />
           <Route path="/korean/chosung" element={<ChosungGame />} />
           <Route path="/korean/chosung-result" element={<ChosungResultScreen />} />
-          
+
           {/* General Game Flow */}
           <Route path="/game" element={<GameScreen />} />
           <Route path="/results" element={<RankingScreen />} />
+          <Route path="/dashboard" element={<DashboardScreen />} />
 
           {/* Playground */}
           <Route path="/playground/clicker" element={<ClickerGame />} />
