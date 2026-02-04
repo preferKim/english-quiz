@@ -3,11 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, X, BookOpen } from 'lucide-react';
 import Button from '../components/Button';
 import { usePlayer } from '../context/PlayerContext';
+import { useAuth } from '../hooks/useAuth';
+import { useLearningProgress } from '../hooks/useLearningProgress';
+import { useLearningContent } from '../hooks/useLearningContent';
 
 const SocialQuizScreen = () => {
     const navigate = useNavigate();
     const { difficulty } = useParams();
-    const { user, addXp } = usePlayer();
+    const { addXp } = usePlayer();
+    const { user } = useAuth();
+    const { recordAnswer } = useLearningProgress(user?.id);
+    const { getQuestions } = useLearningContent();
 
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -31,55 +37,74 @@ const SocialQuizScreen = () => {
             explanationRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [isAnswered]);
-    
-    useEffect(() => {
-        if (gameFinished && user && addXp) {
-            const xpGained = score * 5; // 5 XP for each correct answer
-            if (xpGained > 0) {
-                addXp(xpGained);
-            }
-        }
-    }, [gameFinished, user, addXp, score]);
 
-    const loadQuestions = () => {
+    const xpAddedRef = useRef(false);
+    useEffect(() => {
+        if (gameFinished && user && score > 0 && !xpAddedRef.current) {
+            xpAddedRef.current = true;
+            addXp(score * 5);
+        }
+    }, [gameFinished, user, score]);
+
+    const loadQuestions = async () => {
         setIsLoading(true);
-        fetch(`/words/social_${difficulty}.json`)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                const finalQuestions = data.questions || [];
-                if (finalQuestions.length === 0) {
-                    console.warn(`No questions found for difficulty ${difficulty}.`);
-                }
-                const shuffled = [...finalQuestions].sort(() => 0.5 - Math.random());
-                setQuestions(shuffled.slice(0, 10)); // Take 10 random questions
-                setIsLoading(false);
-            })
-            .catch(error => {
-                console.error(`Failed to load social studies problems for difficulty ${difficulty}:`, error);
-                setQuestions([]);
-                setIsLoading(false);
-            });
+
+        try {
+            // Supabase에서 데이터 가져오기 시도 (_wordId 포함)
+            const courseCode = `social_${difficulty}`;
+            let questionsData = await getQuestions(courseCode, { limit: 20, shuffle: true });
+
+            // Supabase에 데이터가 없으면 JSON fallback
+            if (!questionsData || questionsData.length === 0) {
+                console.log('Supabase에 데이터 없음, JSON fallback 사용');
+
+                const res = await fetch(`/words/social_${difficulty}.json`);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+                const data = await res.json();
+                questionsData = data.questions || [];
+            }
+
+            if (questionsData.length === 0) {
+                console.warn(`No questions found for difficulty ${difficulty}.`);
+            }
+
+            const shuffled = [...questionsData].sort(() => 0.5 - Math.random());
+            setQuestions(shuffled.slice(0, 10));
+        } catch (error) {
+            console.error(`Failed to load social studies problems for difficulty ${difficulty}:`, error);
+            setQuestions([]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
         loadQuestions();
     }, [difficulty]);
 
-    const handleAnswerSelect = (option) => {
+    const handleAnswerSelect = async (option) => {
         if (isAnswered) return;
-        
+
         setSelectedAnswer(option.text);
         setIsAnswered(true);
 
-        if (option.isCorrect) {
+        const currentQuestion = questions[currentQuestionIndex];
+        const isCorrect = option.isCorrect;
+
+        if (isCorrect) {
             setScore(score + 1);
         } else {
             setWrongAnswers(wrongAnswers + 1);
+        }
+
+        // DB에 답안 기록 (오답 시 약점 문제로 저장)
+        if (user?.id && currentQuestion._wordId) {
+            try {
+                await recordAnswer(currentQuestion._wordId, isCorrect, option.text);
+            } catch (err) {
+                console.error('Failed to record answer:', err);
+            }
         }
     };
 
@@ -216,18 +241,18 @@ const SocialQuizScreen = () => {
                 {isAnswered && (
                     <div ref={explanationRef} className="glass-card p-6 rounded-2xl shadow-lg animate-fade-in">
                         <h3 className="font-bold text-lg mb-2 flex items-center">
-                            {selectedAnswer === correctAnswer ? 
-                                <span className="text-green-400">정답입니다!</span> : 
+                            {selectedAnswer === correctAnswer ?
+                                <span className="text-green-400">정답입니다!</span> :
                                 <span className="text-red-400">오답입니다.</span>
                             }
                         </h3>
                         {currentQuestion.hint && (
-                          <div className="text-gray-200 mb-4 text-left">
-                            <h4 className="text-md font-semibold text-white mb-2 flex items-center">
-                                <BookOpen size={18} className="mr-2 text-yellow-400" /> 해설
-                            </h4>
-                            <p className="text-gray-300 leading-relaxed">{currentQuestion.hint}</p>
-                          </div>
+                            <div className="text-gray-200 mb-4 text-left">
+                                <h4 className="text-md font-semibold text-white mb-2 flex items-center">
+                                    <BookOpen size={18} className="mr-2 text-yellow-400" /> 해설
+                                </h4>
+                                <p className="text-gray-300 leading-relaxed">{currentQuestion.hint}</p>
+                            </div>
                         )}
                         <Button
                             onClick={handleNextQuestion}
