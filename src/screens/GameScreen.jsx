@@ -40,7 +40,8 @@ function reducer(state, action) {
                 status: 'playing',
             };
         case 'TICK':
-            if (state.isPaused || (state.gameMode === 'normal' && state.isSpeaking)) return state;
+            // 답안 피드백 중에는 타이머 정지
+            if (state.isPaused || state.feedback || (state.gameMode === 'normal' && state.isSpeaking)) return state;
             if (state.gameMode === 'normal' && state.timeLeft > 0) return { ...state, timeLeft: state.timeLeft - 1 };
             if (state.gameMode === 'speed' && state.speedRunTimeLeft > 0) return { ...state, speedRunTimeLeft: state.speedRunTimeLeft - 1 };
             if (state.gameMode === 'connect') return { ...state, connectTime: state.connectTime + 1 };

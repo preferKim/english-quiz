@@ -6,50 +6,50 @@ import MathRenderer from '../components/MathRenderer';
 
 
 const mathTopics = [
-    { 
-        id: 'number', 
+    {
+        id: 'number',
         level: 1,
-        title: '1. 수와 연산', 
+        title: '1. 수와 연산',
         icon: <Calculator size={20} />,
-        elementary: '자연수, 분수, 소수, 사칙연산', 
-        middle: '정수, 유리수, 실수, 제곱근, 비례식', 
-        high: '복소수, 지수와 로그' 
+        elementary: '자연수, 분수, 소수, 사칙연산',
+        middle: '정수, 유리수, 실수, 제곱근, 비례식',
+        high: '복소수, 지수와 로그'
     },
-    { 
-        id: 'algebra', 
+    {
+        id: 'algebra',
         level: 2,
-        title: '2. 문자와 식 (대수)', 
+        title: '2. 문자와 식 (대수)',
         icon: <Sigma size={20} />,
-        elementary: '수의 규칙, 미지의 수, 식의 표현', 
-        middle: '일차방정식, 부등식, 다항식 연산(인수분해 개념 포함)', 
-        high: '다항식의 연산, 방정식과 부등식, 행렬, 명제' 
+        elementary: '수의 규칙, 미지의 수, 식의 표현',
+        middle: '일차방정식, 부등식, 다항식 연산(인수분해 개념 포함)',
+        high: '다항식의 연산, 방정식과 부등식, 행렬, 명제'
     },
-    { 
-        id: 'function', 
+    {
+        id: 'function',
         level: 3,
-        title: '3. 함수 (변화와 관계)', 
+        title: '3. 함수 (변화와 관계)',
         icon: <TrendingUp size={20} />,
-        elementary: '규칙과 대응, 비와 비율', 
-        middle: '일차함수, 이차함수', 
-        high: '지수·로그·삼각함수, 수열, 극한' 
+        elementary: '규칙과 대응, 비와 비율',
+        middle: '일차함수, 이차함수',
+        high: '지수·로그·삼각함수, 수열, 극한'
     },
-    { 
-        id: 'geometry', 
+    {
+        id: 'geometry',
         level: 4,
-        title: '4. 기하 (도형)', 
+        title: '4. 기하 (도형)',
         icon: <Triangle size={20} />,
-        elementary: '평면/입체도형의 성질, 합동', 
-        middle: '피타고라스, 삼각비, 원의 성질, 공간좌표', 
-        high: '도형의 방정식, 벡터' 
+        elementary: '평면/입체도형의 성질, 합동',
+        middle: '피타고라스, 삼각비, 원의 성질, 공간좌표',
+        high: '도형의 방정식, 벡터'
     },
-    { 
-        id: 'stats', 
+    {
+        id: 'stats',
         level: 5,
-        title: '5. 확률과 통계', 
+        title: '5. 확률과 통계',
         icon: <BarChart3 size={20} />,
-        elementary: '표와 그래프, 평균, 가능성', 
-        middle: '경우의 수, 확률, 대푯값', 
-        high: '순열과 조합, 확률분포, 통계적 추정' 
+        elementary: '표와 그래프, 평균, 가능성',
+        middle: '경우의 수, 확률, 대푯값',
+        high: '순열과 조합, 확률분포, 통계적 추정'
     },
 ];
 
@@ -85,9 +85,8 @@ const seungjeCurriculum = [
     { id: 'seungje_29', title: '29강 인수분해(5) - 여러 문자로 이루어진 식의 인수분해' },
     { id: 'seungje_30', title: '30강 인수분해(6) - 항등식과 미정계수법' },
     { id: 'seungje_31', title: '31강 인수분해(7) - 나머지 정리, 조립제법' },
-    { id: 'seungje_32', title: '32강 인수분해(8) - 인수정리, 초가식의 인수분해(1)' },
-    { id: 'seungje_33_1', title: '33강 인수분해(8) - 인수정리, 초가식의 인수분해(2)' },
-    { id: 'seungje_33_2', title: '33강 등식의 성질' },
+    { id: 'seungje_32', title: '32강 인수분해(8) - 인수정리, 초가식의 인수분해(1,2)' },
+    { id: 'seungje_33', title: '33강 등식의 성질' },
     { id: 'seungje_34', title: '34강 일차방정식의 풀이' },
     { id: 'seungje_35', title: '35강 연립방정식의 풀이' },
     { id: 'seungje_36', title: '36강 연립방정식의 활용' },
@@ -118,16 +117,16 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
                         fetch('/words/math_jsj50day_objectives.json'),
                         fetch('/words/math_jsj50day.json')
                     ]);
-                    
+
                     if (!objectivesRes.ok || !stagesRes.ok) {
                         throw new Error('Failed to load Seungje math data');
                     }
-                    
+
                     const objectivesData = await objectivesRes.json();
                     const stagesData = await stagesRes.json();
-                    
+
                     setObjectives(objectivesData);
-                    
+
                     if (Array.isArray(stagesData)) {
                         const stageSet = new Set(stagesData.map(q => q.stage));
                         setAvailableStages(stageSet);
@@ -137,7 +136,7 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
                     setAvailableStages(new Set()); // Set to empty set on error
                 }
             };
-            
+
             fetchSeungjeData();
         }
     }, [activeTab]);
@@ -153,7 +152,7 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
 
     return (
         <div className="glass-card p-6 sm:p-8 text-center relative max-w-4xl w-full mx-auto">
-             <div className="absolute top-4 left-4 z-10">
+            <div className="absolute top-4 left-4 z-10">
                 <button
                     onClick={() => navigate(-1)}
                     className="text-sm font-semibold text-gray-200 hover:text-white px-3 py-1.5 rounded-full border border-white/40 hover:border-white/80 bg-black/20 hover:bg-black/40 transition-all flex items-center"
@@ -174,22 +173,20 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
             <div className="mb-6 flex justify-center border-b border-white/10">
                 <button
                     onClick={() => setActiveTab('level')}
-                    className={`px-4 py-2 text-lg font-semibold transition-colors ${
-                        activeTab === 'level' ? 'text-primary-light border-b-2 border-primary-light' : 'text-gray-400 hover:text-white'
-                    }`}
+                    className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === 'level' ? 'text-primary-light border-b-2 border-primary-light' : 'text-gray-400 hover:text-white'
+                        }`}
                 >
                     단계별 학습
                 </button>
                 <button
                     onClick={() => setActiveTab('seungje')}
-                    className={`px-4 py-2 text-lg font-semibold transition-colors ${
-                        activeTab === 'seungje' ? 'text-primary-light border-b-2 border-primary-light' : 'text-gray-400 hover:text-white'
-                    }`}
+                    className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === 'seungje' ? 'text-primary-light border-b-2 border-primary-light' : 'text-gray-400 hover:text-white'
+                        }`}
                 >
                     정승제 50일수학
                 </button>
             </div>
-            
+
             {activeTab === 'level' && (
                 <div className="grid gap-6 text-left">
                     {mathTopics.map((topic) => (
@@ -200,9 +197,9 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
                                 </div>
                                 <h3 className="text-xl font-bold text-white">{topic.title}</h3>
                             </div>
-                            
+
                             <div className="space-y-3">
-                                <button 
+                                <button
                                     onClick={() => handleTopicSelect(topic.level, 'elementary')}
                                     className="w-full text-left p-4 rounded-lg bg-black/20 hover:bg-primary/20 border border-white/5 hover:border-primary/50 transition-all group flex items-start"
                                 >
@@ -210,7 +207,7 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
                                     <span className="text-gray-300 group-hover:text-white">{topic.elementary}</span>
                                 </button>
 
-                                <button 
+                                <button
                                     onClick={() => handleTopicSelect(topic.level, 'middle')}
                                     className="w-full text-left p-4 rounded-lg bg-black/20 hover:bg-secondary/20 border border-white/5 hover:border-secondary/50 transition-all group flex items-start"
                                 >
@@ -218,7 +215,7 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
                                     <span className="text-gray-300 group-hover:text-white">{topic.middle}</span>
                                 </button>
 
-                                <button 
+                                <button
                                     onClick={() => handleTopicSelect(topic.level, 'high')}
                                     className="w-full text-left p-4 rounded-lg bg-black/20 hover:bg-danger/20 border border-white/5 hover:border-danger/50 transition-all group flex items-start"
                                 >
@@ -232,9 +229,9 @@ const MathSelectionScreen = ({ user, onSignUp, onLogin, onLogout }) => {
             )}
 
             {activeTab === 'seungje' && (
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
                     {seungjeCurriculum.map((item) => (
-                        <button 
+                        <button
                             key={item.id}
                             onClick={() => handleTopicSelect(item.id)}
                             className="w-full text-left p-4 rounded-lg bg-black/20 hover:bg-white/20 border border-white/10 hover:border-white/30 transition-all group"
