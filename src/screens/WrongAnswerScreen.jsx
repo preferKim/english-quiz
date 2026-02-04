@@ -68,6 +68,19 @@ const WrongAnswerScreen = () => {
             };
         }
 
+        // 정보처리기사 (certificate)
+        if (courseCode.startsWith('certificate') || (word.problem && word.options && word.answer && word.explanation)) {
+            return {
+                type: 'certificate',
+                questionText: word.problem,
+                options: word.options || [],
+                correctAnswer: word.answer,
+                explanation: word.explanation,
+                hint: word.hint,
+                wordId: word._wordId || word.wordId
+            };
+        }
+
         // 수학
         if (courseCode.startsWith('math') || word.problem) {
             return {
