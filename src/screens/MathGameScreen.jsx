@@ -38,13 +38,22 @@ const MathGameScreen = () => {
   useEffect(() => {
     const initSession = async () => {
       if (user?.id && questions.length > 0 && !sessionRef.current && !gameFinished) {
-        const selectedDifficulty = difficulty || 'easy';
+        const selectedDifficulty = difficulty || 'elementary';
         const selectedTopicLevel = topicLevel || 1;
+
         let courseCode;
         if (selectedDifficulty === 'jsj50day') {
-          courseCode = `math_jsj50day_${selectedTopicLevel}`;
+          const paddedLevel = String(selectedTopicLevel).padStart(2, '0');
+          courseCode = `math_seungje_${paddedLevel}`;
         } else {
-          courseCode = `math_${selectedDifficulty}_${selectedTopicLevel}`;
+          // 단계별 학습: math_level_{단계}_{난이도}
+          // fallback 'easy' -> 'elementary' 처리
+          let diff = selectedDifficulty;
+          if (diff === 'easy') diff = 'elementary';
+          if (diff === 'medium') diff = 'middle';
+          if (diff === 'hard') diff = 'high';
+
+          courseCode = `math_level_${selectedTopicLevel}_${diff}`;
         }
 
         console.log('Starting session for:', courseCode);
