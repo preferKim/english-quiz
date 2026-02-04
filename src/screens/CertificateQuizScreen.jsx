@@ -63,22 +63,34 @@ const CertificateQuizScreen = () => {
             if (!res.ok) throw new Error('Failed to fetch data');
             const data = await res.json();
 
-            let filteredQuestions = [];
+            let finalQuestions = [];
+
             if (subjectId === 'all') {
-                filteredQuestions = data;
                 setTimeLeft(150 * 60); // 2.5 hours for full exam
+
+                // Select 20 random questions from each level (1-5) and order them
+                const levels = [1, 2, 3, 4, 5];
+                for (const level of levels) {
+                    const levelQuestions = data.filter(q => q.level === level);
+                    // Shuffle available questions for this level
+                    const shuffledLevelQuestions = [...levelQuestions].sort(() => 0.5 - Math.random());
+                    // Take first 20 (or fewer if not enough data)
+                    const selected = shuffledLevelQuestions.slice(0, 20);
+                    finalQuestions = [...finalQuestions, ...selected];
+                }
             } else {
-                filteredQuestions = data.filter(q => q.level === subjectId);
+                const filteredQuestions = data.filter(q => q.level === subjectId);
                 setTimeLeft(30 * 60); // 30 minutes for single subject
+                // Shuffle questions for single subject and take 20
+                const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
+                finalQuestions = shuffled.slice(0, 20);
             }
 
-            if (filteredQuestions.length === 0) {
+            if (finalQuestions.length === 0) {
                 console.warn('No questions found for subject:', subjectId);
             }
 
-            // Shuffle questions
-            const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
-            setQuestions(shuffled);
+            setQuestions(finalQuestions);
 
             // Start Session
             if (user?.id) {
