@@ -18,6 +18,7 @@ const SUBJECT_CONFIG = {
     math: { icon: Calculator, color: 'speed', name: '수학', emoji: '🔢' },
     science: { icon: FlaskConical, color: 'warning', name: '과학', emoji: '🔬' },
     social: { icon: Globe, color: 'info', name: '사회', emoji: '🌏' },
+    certificate: { icon: Award, color: 'primary', name: '자격증', emoji: '💻' },
 };
 
 const DashboardScreen = () => {
@@ -58,6 +59,7 @@ const DashboardScreen = () => {
             math: { total: 0, correct: 0, wrong: 0, totalItems: 0, mastered: 0 },
             social: { total: 0, correct: 0, wrong: 0, totalItems: 0, mastered: 0 },
             science: { total: 0, correct: 0, wrong: 0, totalItems: 0, mastered: 0 },
+            certificate: { total: 0, correct: 0, wrong: 0, totalItems: 0, mastered: 0 },
             total: { total: 0, correct: 0, wrong: 0 }
         };
 
