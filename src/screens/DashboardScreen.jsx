@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, TrendingUp, Target, Award, Brain, Trash2, Play, BookOpen, Calculator, Globe, FlaskConical } from 'lucide-react';
@@ -21,11 +21,32 @@ const DashboardScreen = () => {
     const navigate = useNavigate();
     const { level, xp, xpGainedInCurrentLevel, xpRequiredForCurrentLevel } = usePlayer();
     const { user } = useAuth();
-    const { getWeakWords, removeWeakWord } = useLearningProgress(user?.id);
+    const { getWeakWords, removeWeakWord, progress, fetchProgress } = useLearningProgress(user?.id);
 
     const [weakWordsList, setWeakWordsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedSubject, setSelectedSubject] = useState('all');
+
+    // 학습 진행도 가져오기
+    useEffect(() => {
+        if (user?.id) {
+            fetchProgress();
+        }
+    }, [user?.id, fetchProgress]);
+
+    // 전체 정답률 계산
+    const totalAccuracy = useMemo(() => {
+        const progressValues = Object.values(progress || {});
+        if (progressValues.length === 0) return 0;
+
+        const { totalCorrect, totalWrong } = progressValues.reduce((acc, curr) => ({
+            totalCorrect: acc.totalCorrect + (curr.correct_count || 0),
+            totalWrong: acc.totalWrong + (curr.wrong_count || 0)
+        }), { totalCorrect: 0, totalWrong: 0 });
+
+        const total = totalCorrect + totalWrong;
+        return total === 0 ? 0 : Math.round((totalCorrect / total) * 100);
+    }, [progress]);
 
     // 약점 단어 로딩
     useEffect(() => {
@@ -178,7 +199,7 @@ const DashboardScreen = () => {
                     >
                         <ArrowLeft size={16} className="mr-1" /> 홈으로
                     </button>
-                    <h1 className="text-3xl font-bold text-white">학습 대시보드</h1>
+                    <h1 className="text-3xl font-bold text-white">대시보드</h1>
                     <div className="w-20"></div>
                 </div>
 
@@ -186,7 +207,7 @@ const DashboardScreen = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <StatCard icon={Award} title="현재 레벨" value={level} color="primary" />
                     <StatCard icon={TrendingUp} title="총 경험치" value={xp} color="success" />
-                    <StatCard icon={Target} title="정답률" value="-%" color="speed" />
+                    <StatCard icon={Target} title="정답률" value={`${totalAccuracy}%`} color="speed" />
                     <StatCard icon={Brain} title="약점 문제" value={weakWordsList.length} color="danger" />
                 </div>
 
@@ -223,7 +244,7 @@ const DashboardScreen = () => {
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
                             <Brain size={24} className="text-danger-light" />
-                            오답노트 (약점 문제)
+                            오답노트
                         </h2>
                         {weakWordsList.length > 0 && (
                             <button

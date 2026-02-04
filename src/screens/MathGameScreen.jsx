@@ -34,6 +34,26 @@ const MathGameScreen = () => {
     }
   }, [isAnswered]);
 
+  // 세션 시작
+  useEffect(() => {
+    const initSession = async () => {
+      if (user?.id && questions.length > 0 && !sessionRef.current && !gameFinished) {
+        const selectedDifficulty = difficulty || 'easy';
+        const selectedTopicLevel = topicLevel || 1;
+        let courseCode;
+        if (selectedDifficulty === 'jsj50day') {
+          courseCode = `math_jsj50day_${selectedTopicLevel}`;
+        } else {
+          courseCode = `math_${selectedDifficulty}_${selectedTopicLevel}`;
+        }
+
+        console.log('Starting session for:', courseCode);
+        sessionRef.current = await startSession(courseCode, 'quiz');
+      }
+    };
+    initSession();
+  }, [user?.id, questions.length, difficulty, topicLevel, gameFinished, startSession]);
+
   // Handle XP gain on game finish
   const xpAddedRef = useRef(false);
   useEffect(() => {
@@ -192,6 +212,16 @@ const MathGameScreen = () => {
   }
 
   if (gameFinished) {
+    if (user?.id && sessionRef.current) {
+      endSession({
+        totalQuestions: questions.length,
+        correctCount: score,
+        wrongCount: wrongAnswers,
+        score: score * 10 // 점수 계산 방식 조정 필요시 수정
+      });
+      sessionRef.current = null;
+    }
+
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 text-center">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
