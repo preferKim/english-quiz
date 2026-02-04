@@ -4,6 +4,7 @@ import { ArrowLeft, Check, X, Clock } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../hooks/useAuth';
 import { useLearningProgress } from '../hooks/useLearningProgress';
+import { supabase } from '../supabaseClient';
 
 const CertificateQuizScreen = () => {
     const navigate = useNavigate();
@@ -59,30 +60,51 @@ const CertificateQuizScreen = () => {
     const loadQuestions = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/words/certificate_EIP.json');
-            if (!res.ok) throw new Error('Failed to fetch data');
-            const data = await res.json();
-
             let finalQuestions = [];
 
             if (subjectId === 'all') {
                 setTimeLeft(150 * 60); // 2.5 hours for full exam
 
-                // Select 20 random questions from each level (1-5) and order them
+                // Select 20 random questions from each level (1-5)
                 const levels = [1, 2, 3, 4, 5];
                 for (const level of levels) {
-                    const levelQuestions = data.filter(q => q.level === level);
-                    // Shuffle available questions for this level
-                    const shuffledLevelQuestions = [...levelQuestions].sort(() => 0.5 - Math.random());
-                    // Take first 20 (or fewer if not enough data)
-                    const selected = shuffledLevelQuestions.slice(0, 20);
+                    const courseCode = `certificate_level_${level}`;
+
+                    // Fetch all questions for this level
+                    const { data: levelQuestions, error } = await supabase
+                        .from('words')
+                        .select('*')
+                        .eq('course_code', courseCode)
+                        .eq('is_active', true);
+
+                    if (error) {
+                        console.error(`Error fetching level ${level}:`, error);
+                        continue;
+                    }
+
+                    // Shuffle and take 20
+                    const shuffled = [...(levelQuestions || [])].sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, 20);
                     finalQuestions = [...finalQuestions, ...selected];
                 }
             } else {
-                const filteredQuestions = data.filter(q => q.level === subjectId);
+                const courseCode = `certificate_level_${subjectId}`;
                 setTimeLeft(30 * 60); // 30 minutes for single subject
-                // Shuffle questions for single subject and take 20
-                const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
+
+                // Fetch questions for single subject
+                const { data: subjectQuestions, error } = await supabase
+                    .from('words')
+                    .select('*')
+                    .eq('course_code', courseCode)
+                    .eq('is_active', true);
+
+                if (error) {
+                    console.error('Error fetching questions:', error);
+                    throw error;
+                }
+
+                // Shuffle and take 20
+                const shuffled = [...(subjectQuestions || [])].sort(() => 0.5 - Math.random());
                 finalQuestions = shuffled.slice(0, 20);
             }
 
@@ -90,7 +112,18 @@ const CertificateQuizScreen = () => {
                 console.warn('No questions found for subject:', subjectId);
             }
 
-            setQuestions(finalQuestions);
+            // Transform questions to match expected format
+            const transformedQuestions = finalQuestions.map(q => ({
+                id: q.id, // Supabase ID for recordAnswer
+                level: q.level,
+                problem: q.content.problem,
+                options: q.content.options,
+                answer: q.content.answer,
+                hint: q.content.hint,
+                explanation: q.content.explanation
+            }));
+
+            setQuestions(transformedQuestions);
 
             // Start Session
             if (user?.id) {
@@ -131,12 +164,17 @@ const CertificateQuizScreen = () => {
         }
 
         // Record to DB
-        if (user?.id) {
-            // Generate a pseudo wordID if missing, or handle in backend. 
-            // Ideally data should have IDs. Assuming existing logic handles it or we skip for now.
-            // Reuse generic recordAnswer but note that without real IDs tracking weak words might be limited unless backend supports ad-hoc.
-            // For now we just record correct/wrong for stats if possible.
-            // Actually, without wordId, recordAnswer might fail. Secure way is logging locally.
+        if (user?.id && currentQuestion.id) {
+            try {
+                await recordAnswer(
+                    currentQuestion.id,
+                    isCorrect,
+                    option,
+                    null // timeSpentMs (optional)
+                );
+            } catch (error) {
+                console.error('Failed to record answer:', error);
+            }
         }
     };
 
