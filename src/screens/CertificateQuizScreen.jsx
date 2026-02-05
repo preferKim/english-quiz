@@ -159,6 +159,7 @@ const CertificateQuizScreen = () => {
 
         if (isCorrect) {
             setScore(score + 1);
+            addXp('certificate', 1);
         } else {
             setWrongAnswers(wrongAnswers + 1);
         }
@@ -198,7 +199,7 @@ const CertificateQuizScreen = () => {
                 wrongCount: wrongAnswers,
                 score: score * 5
             });
-            addXp(score * 10);
+            // XP already awarded per correct answer
         }
     };
 

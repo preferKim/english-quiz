@@ -171,7 +171,12 @@ const GameScreen = () => {
         if (status === 'playing') {
             if (gameMode === 'normal' && timeLeft === 0) handleTimeout();
             else if (gameMode === 'speed' && speedRunTimeLeft === 0) dispatch({ type: 'FINISH_GAME' });
-            else if (gameMode === 'connect' && (lives <= 0 || (connectWords.length && matchedPairs.length === connectWords.length))) dispatch({ type: 'FINISH_GAME' });
+            else if (gameMode === 'connect' && (lives <= 0 || (connectWords.length && matchedPairs.length === connectWords.length))) {
+                if (lives > 0 && matchedPairs.length === connectWords.length) {
+                    addXp('english', 5);
+                }
+                dispatch({ type: 'FINISH_GAME' });
+            }
         }
     }, [status, gameMode, timeLeft, speedRunTimeLeft, lives, matchedPairs.length, connectWords.length]);
 
@@ -247,7 +252,7 @@ const GameScreen = () => {
         dispatch({ type: 'CHECK_ANSWER', payload: { isCorrect } });
 
         if (isCorrect) {
-            addXp(difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3);
+            addXp('english', 1);
         } else {
             // Track weak word on wrong answer
             if (currentWord) {
@@ -312,7 +317,21 @@ const GameScreen = () => {
         }
         return <RankingScreen onRestart={handleRestart} gameMode={gameMode} score={score} wrongAnswers={wrongAnswers} total={total} lives={lives} time={gameMode === 'connect' ? connectTime : speedRunTimeLeft} />;
     }
-    if (gameMode === 'connect') return <ConnectingGameScreen words={connectWords} lives={lives} onCheckAnswer={(w1, w2) => dispatch({ type: 'CHECK_CONNECT_ANSWER', payload: { word1: w1, word2: w2 } })} matchedPairs={matchedPairs} resetGame={togglePause} time={connectTime} />;
+    if (gameMode === 'connect') {
+        return (
+            <div className="relative w-full min-h-screen">
+                {isPaused && <PauseMenu onResume={togglePause} onRestart={handleRestart} onExit={() => navigate('/english')} />}
+                <ConnectingGameScreen
+                    words={connectWords}
+                    lives={lives}
+                    onCheckAnswer={(w1, w2) => dispatch({ type: 'CHECK_CONNECT_ANSWER', payload: { word1: w1, word2: w2 } })}
+                    matchedPairs={matchedPairs}
+                    resetGame={togglePause}
+                    time={connectTime}
+                />
+            </div>
+        );
+    }
 
     const currentWord = words[currentIndex] || {};
     const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;

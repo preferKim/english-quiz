@@ -51,13 +51,7 @@ const ScienceQuizScreen = () => {
         initSession();
     }, [user?.id, questions.length, difficulty, gameFinished, startSession]);
 
-    const xpAddedRef = useRef(false);
-    useEffect(() => {
-        if (gameFinished && user && score > 0 && !xpAddedRef.current) {
-            xpAddedRef.current = true;
-            addXp(score * 5);
-        }
-    }, [gameFinished, user, score]);
+    // XP is now awarded per correct answer in handleAnswerSelect
 
     const loadQuestions = async () => {
         setIsLoading(true);
@@ -107,6 +101,7 @@ const ScienceQuizScreen = () => {
 
         if (isCorrect) {
             setScore(score + 1);
+            addXp('science', 1);
         } else {
             setWrongAnswers(wrongAnswers + 1);
         }
