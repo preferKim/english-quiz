@@ -55,6 +55,7 @@ function App() {
           <Route path="/english" element={<EnglishSelectionScreen />} />
           <Route path="/english/alphabet" element={<AlphabetStudyScreen />} />
           <Route path="/math" element={<MathSelectionScreen />} />
+          <Route path="/math/:tab" element={<MathSelectionScreen />} />
           <Route path="/korean" element={<KoreanSelectionScreen />} />
           <Route path="/social" element={<SocialSelectionScreen />} />
           <Route path="/social/:difficulty" element={<SocialQuizScreen />} />

@@ -76,7 +76,7 @@ export function useLearningProgress(userId) {
                 .from('courses')
                 .select('id')
                 .eq('course_code', courseCode)
-                .single();
+                .maybeSingle();
 
             if (!course) {
                 console.warn('Course not found:', courseCode);
@@ -299,10 +299,9 @@ export function useLearningProgress(userId) {
         try {
             // 1. 과정 정보(total_items) 조회
             const { data: course } = await supabase
-                .from('courses')
                 .select('total_items')
                 .eq('id', courseId)
-                .single();
+                .maybeSingle();
 
             const totalItems = course?.total_items || 0;
 

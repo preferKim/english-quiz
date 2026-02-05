@@ -183,14 +183,7 @@ const WrongAnswerScreen = () => {
         }
     }, [isAnswered]);
 
-    // 게임 종료 시 XP (한 번만 실행)
-    const xpAddedRef = useRef(false);
-    useEffect(() => {
-        if (gameFinished && score > 0 && !xpAddedRef.current) {
-            xpAddedRef.current = true;
-            addXp(score * 5);
-        }
-    }, [gameFinished, score]);
+    // XP is now awarded per correct answer in handleAnswerSelect
 
     const handleAnswerSelect = async (option) => {
         if (isAnswered) return;
@@ -203,6 +196,15 @@ const WrongAnswerScreen = () => {
 
         if (isCorrect) {
             setScore(s => s + 1);
+            // Determine subject from course code or type
+            let xpSubject = 'english';
+            const courseCode = customWords[currentIndex]?._courseCode || '';
+            if (courseCode.startsWith('math')) xpSubject = 'math';
+            else if (courseCode.startsWith('social')) xpSubject = 'social';
+            else if (courseCode.startsWith('science')) xpSubject = 'science';
+            else if (courseCode.startsWith('korean')) xpSubject = 'korean';
+            else if (courseCode.startsWith('certificate')) xpSubject = 'certificate';
+            addXp(xpSubject, 1);
         } else {
             setWrongAnswers(w => w + 1);
         }
